@@ -18,7 +18,7 @@ export default function CompanionDownload({ userId, apiUrl }) {
           Download for Windows
         </a>
         <a
-          href={`${apiUrl}/api/companion/download/mac?user_id=${userId}`}
+          href="https://github.com/malover-ckl/the-gallery-backend/releases/download/v1.0/TheGallery.exe"
           className="companion-btn"
           download
         >
