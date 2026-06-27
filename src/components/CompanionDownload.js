@@ -10,7 +10,7 @@ export default function CompanionDownload({ userId, apiUrl }) {
       </p>
       <div className="companion-btns">
         <a
-          href={`${apiUrl}/api/companion/download/windows?user_id=${userId}`}
+          href="https://github.com/malover-ckl/the-gallery-backend/releases/download/v1.0/TheGallery.exe"
           className="companion-btn"
           download
         >
