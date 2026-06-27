@@ -8,14 +8,22 @@ import './Dashboard.css';
 const API = process.env.REACT_APP_API_URL || '';
 
 export default function Dashboard() {
-  const [searchParams]  = useSearchParams();
-  const userId          = searchParams.get('user_id');
+  const [searchParams] = useSearchParams();
+  const userId         = searchParams.get('user_id');
 
-  const [user, setUser]         = useState(null);
-  const [albums, setAlbums]     = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [prefs, setPrefs]       = useState(null);
-  const [saved, setSaved]       = useState(false);
+  const [user, setUser]             = useState(null);
+  const [albums, setAlbums]         = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [prefs, setPrefs]           = useState(null);
+  const [saved, setSaved]           = useState(false);
+  const [isCustom, setIsCustom]     = useState(false);
+  const [layoutSaved, setLayoutSaved] = useState(false);
+
+  // Search modal state
+  const [replaceIndex, setReplaceIndex] = useState(null);
+  const [searchQuery, setSearchQuery]   = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching]       = useState(false);
 
   // Load user + preferences
   useEffect(() => {
@@ -34,7 +42,11 @@ export default function Dashboard() {
     setLoading(true);
     fetch(`${API}/api/preview/${userId}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(data => { setAlbums(data.albums || []); setLoading(false); })
+      .then(data => {
+        setAlbums(data.albums || []);
+        setIsCustom(data.is_custom || false);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [userId]);
 
@@ -51,6 +63,70 @@ export default function Dashboard() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     loadPreview();
+  };
+
+  // Save custom layout to backend
+  const saveLayout = async (newAlbums) => {
+    await fetch(`${API}/api/layout/${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ albums: newAlbums }),
+    });
+    setIsCustom(true);
+    setLayoutSaved(true);
+    setTimeout(() => setLayoutSaved(false), 2000);
+  };
+
+  // Reset layout back to Spotify order
+  const resetLayout = async () => {
+    await fetch(`${API}/api/layout/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    setIsCustom(false);
+    loadPreview();
+  };
+
+  // Handle drag reorder
+  const handleReorder = (newAlbums) => {
+    setAlbums(newAlbums);
+    saveLayout(newAlbums);
+  };
+
+  // Open replace modal
+  const handleReplace = (index) => {
+    setReplaceIndex(index);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  // Search Spotify
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const r = await fetch(`${API}/api/search/${userId}?q=${encodeURIComponent(searchQuery)}`, {
+        credentials: 'include',
+      });
+      const data = await r.json();
+      setSearchResults(data.results || []);
+    } catch {
+      setSearchResults([]);
+    }
+    setSearching(false);
+  };
+
+  // Pick a replacement album
+  const handlePick = (album) => {
+    const newAlbums = [...albums];
+    newAlbums[replaceIndex] = album;
+    setAlbums(newAlbums);
+    saveLayout(newAlbums);
+    setReplaceIndex(null);
+    setSearchResults([]);
+    setSearchQuery('');
   };
 
   const downloadWallpaper = () => {
@@ -83,17 +159,71 @@ export default function Dashboard() {
                 {albums.length} albums · {prefs.grid_cols}×{prefs.grid_rows} grid · {prefs.canvas_w}×{prefs.canvas_h}
               </p>
             </div>
-            <button className="btn-download" onClick={downloadWallpaper}>
-              Download wallpaper
-            </button>
+            <div className="dash-main-actions">
+              {isCustom && (
+                <button className="btn-reset" onClick={resetLayout}>
+                  Reset to Spotify order
+                </button>
+              )}
+              {layoutSaved && <span className="layout-saved">Layout saved ✓</span>}
+              <button className="btn-download" onClick={downloadWallpaper}>
+                Download wallpaper
+              </button>
+            </div>
           </div>
 
           {loading
             ? <div className="preview-loading"><div className="spinner" />Building preview…</div>
-            : <AlbumGrid albums={albums} cols={prefs.grid_cols} rows={prefs.grid_rows} gap={prefs.gap_px} />
+            : <AlbumGrid
+                albums={albums}
+                cols={prefs.grid_cols}
+                rows={prefs.grid_rows}
+                gap={prefs.gap_px}
+                onReorder={handleReorder}
+                onReplace={handleReplace}
+              />
           }
         </main>
       </div>
+
+      {/* Replace modal */}
+      {replaceIndex !== null && (
+        <div className="modal-backdrop" onClick={() => setReplaceIndex(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Replace album #{replaceIndex + 1}</h3>
+              <button className="modal-close" onClick={() => setReplaceIndex(null)}>✕</button>
+            </div>
+            <form className="modal-search" onSubmit={handleSearch}>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search for an album…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="modal-input"
+              />
+              <button type="submit" className="modal-search-btn" disabled={searching}>
+                {searching ? '…' : 'Search'}
+              </button>
+            </form>
+            <div className="modal-results">
+              {searchResults.map((album, i) => (
+                <div key={i} className="modal-result" onClick={() => handlePick(album)}>
+                  <img src={album.url} alt={album.name} />
+                  <div className="modal-result-info">
+                    <span className="modal-result-name">{album.name}</span>
+                    <span className="modal-result-artist">{album.artist}</span>
+                  </div>
+                </div>
+              ))}
+              {searchResults.length === 0 && !searching && searchQuery && (
+                <p className="modal-empty">No results found.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
