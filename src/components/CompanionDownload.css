@@ -1,0 +1,7 @@
+.companion { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+.companion-title { font-size: 13px; font-weight: 500; margin-bottom: 0.5rem; }
+.companion-body { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
+.companion-btns { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0.75rem; }
+.companion-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--text); background: var(--surface-2); transition: border-color 0.15s; }
+.companion-btn:hover { border-color: var(--accent); color: var(--accent); }
+.companion-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
