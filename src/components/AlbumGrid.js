@@ -95,43 +95,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
         ))}
       </div>
       <p className="grid-note">
-        {albums.length} of {total} slots · drag to reorder · click <ReplaceIcon style={{display:'inline',width:9,height:9,verticalAlign:'middle',opacity:0.5}} /> to replace
-      </p>
-    </div>
-  );
-}           key={i}
-            className={`album-cell${dragOver === i ? ' drag-over' : ''}`}
-            title={album ? `${album.artist} — ${album.name}` : ''}
-            draggable
-            onDragStart={(e) => handleDragStart(e, i)}
-            onDragOver={(e)  => handleDragOver(e, i)}
-            onDrop={(e)      => handleDrop(e, i)}
-            onDragEnd={handleDragEnd}
-          >
-            {album
-              ? <img src={album.url} alt={album.name} loading="lazy" draggable={false} />
-              : <div className="album-empty" />
-            }
-
-            {i < 10 && album && (
-              <span className="album-rank">#{i + 1}</span>
-            )}
-
-            {/* Hover overlay — replace icon only */}
-            <div className="album-overlay">
-              <div
-                className="album-overlay-icon"
-                onClick={(e) => handleReplaceClick(e, i)}
-                title="Replace this album"
-              >
-                <ReplaceIcon />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <p className="grid-note">
-        {albums.length} of {total} slots · drag to reorder · click <ReplaceIcon style={{display:'inline',width:9,height:9,verticalAlign:'middle',opacity:0.5}} /> to replace
+        {albums.length} of {total} slots · drag to reorder · click icon to replace
       </p>
     </div>
   );
