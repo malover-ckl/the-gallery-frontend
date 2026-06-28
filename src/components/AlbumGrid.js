@@ -11,6 +11,15 @@ function ReplaceIcon() {
   );
 }
 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplace }) {
   const total     = cols * rows;
   const cells     = Array.from({ length: total }, (_, i) => albums[i] || null);
@@ -20,7 +29,6 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
   const handleDragStart = (e, i) => {
     dragIndex.current = i;
     e.dataTransfer.effectAllowed = 'move';
-    // Slightly transparent ghost
     e.dataTransfer.setDragImage(e.currentTarget, 20, 20);
   };
 
@@ -36,7 +44,6 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
     if (dragIndex.current === null || dragIndex.current === i) return;
     const newAlbums = [...albums];
     const from = dragIndex.current;
-    // Simple swap — only two positions change
     [newAlbums[from], newAlbums[i]] = [newAlbums[i], newAlbums[from]];
     dragIndex.current = null;
     onReorder(newAlbums);
@@ -50,6 +57,10 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
   const handleReplaceClick = (e, i) => {
     e.stopPropagation();
     onReplace(i);
+  };
+
+  const handleShuffle = () => {
+    onReorder(shuffle(albums));
   };
 
   return (
@@ -76,12 +87,9 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
               ? <img src={album.url} alt={album.name} loading="lazy" draggable={false} />
               : <div className="album-empty" />
             }
-
             {i < 10 && album && (
               <span className="album-rank">#{i + 1}</span>
             )}
-
-            {/* Hover overlay — replace icon only */}
             <div className="album-overlay">
               <div
                 className="album-overlay-icon"
@@ -94,9 +102,20 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
           </div>
         ))}
       </div>
-      <p className="grid-note">
-        {albums.length} of {total} slots · drag to reorder · click icon to replace
-      </p>
+      <div className="grid-footer">
+        <p className="grid-note">
+          {albums.length} of {total} slots · drag to reorder · click icon to replace
+        </p>
+        <button className="btn-shuffle" onClick={handleShuffle} title="Shuffle order">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+          Shuffle
+        </button>
+      </div>
     </div>
   );
 }
