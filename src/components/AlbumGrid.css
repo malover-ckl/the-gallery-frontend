@@ -1,27 +1,164 @@
 .album-grid-wrap { }
 
-.grid-hint { font-size: 13px; color: var(--accent); margin-bottom: 0.75rem; padding: 8px 12px; border: 1px solid var(--accent); border-radius: var(--radius); display: inline-block; }
+/* Hint bar when a cell is selected for swapping */
+.grid-hint {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+  padding: 7px 12px;
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius);
+  display: inline-block;
+  background: var(--accent-dim);
+}
 
-.album-grid { display: grid; border-radius: 4px; overflow: hidden; background: #000; }
+/* The grid itself */
+.album-grid {
+  display: grid;
+  background: #000;
+  border-radius: 4px;
+  overflow: hidden;
+}
 
-.album-cell { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--surface-2); }
-.album-cell img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
-.album-cell:hover img { transform: scale(1.04); }
-.album-cell.selected { outline: 2px solid var(--accent); outline-offset: -2px; }
-.album-cell.selected img { opacity: 0.7; }
+/* Individual cell */
+.album-cell {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--surface-2);
+  cursor: pointer;
+}
 
-.album-empty { width: 100%; height: 100%; background: #111; }
+.album-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  will-change: transform;
+}
 
-.album-rank { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.75); color: var(--accent); font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.04em; z-index: 2; }
+/* Selected state (swap mode) */
+.album-cell.selected img {
+  filter: brightness(0.55);
+}
+.album-cell.selected::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  z-index: 3;
+}
 
-/* Action buttons shown on hover */
-.album-actions { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; background: rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.15s; }
+/* Empty slot */
+.album-empty {
+  width: 100%;
+  height: 100%;
+  background: #0e0d0b;
+}
+
+/* Rank badge — top-left, like a vinyl price sticker */
+.album-rank {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: rgba(14,13,11,0.78);
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 2px 5px;
+  border-radius: 2px;
+  z-index: 3;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Cinematic hover overlay */
+.album-actions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(10,9,8,0.72);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.album-cell:hover img {
+  transform: scale(1.05);
+  filter: brightness(0.7);
+}
 .album-cell:hover .album-actions { opacity: 1; }
 
-.btn-move, .btn-replace { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px; border: none; cursor: pointer; white-space: nowrap; }
-.btn-move { background: var(--accent); color: #0a0a0a; }
-.btn-replace { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
-.btn-move:hover { opacity: 0.85; }
-.btn-replace:hover { background: rgba(255,255,255,0.25); }
+/* Move / Replace as ghost text labels, not pill buttons */
+.btn-move,
+.btn-replace {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.9);
+  transition: color 0.15s;
+  line-height: 1;
+}
 
-.grid-note { margin-top: 0.75rem; font-size: 12px; color: var(--text-muted); }
+.btn-move::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.btn-move::after {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.btn-replace {
+  color: rgba(200,184,154,0.9);
+}
+
+.btn-move:hover { color: #fff; }
+.btn-replace:hover { color: var(--accent); }
+
+/* Divider between the two actions */
+.album-actions::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Footnote */
+.grid-note {
+  margin-top: 0.75rem;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}

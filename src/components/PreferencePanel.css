@@ -1,13 +1,81 @@
 .pref-panel { }
-.pref-title { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 1.5rem; }
 
-.pref-group { margin-bottom: 1.25rem; }
-.pref-label { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.pref-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.01em;
+}
 
-.pill-group { display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { font-size: 12px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.12s; }
-.pill:hover { border-color: var(--accent); color: var(--text); }
-.pill.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+.pref-group {
+  margin-bottom: 1.35rem;
+}
 
-.btn-save { width: 100%; margin-top: 0.5rem; padding: 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.btn-save:hover { border-color: var(--accent); color: var(--accent); }
+/* Section label — like a record store bin divider */
+.pref-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Pill group */
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pill {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  padding: 5px 11px;
+  border-radius: 3px;
+  border: 1px solid var(--border-warm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  line-height: 1.4;
+}
+
+.pill:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.pill.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* Apply button */
+.btn-save {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-save:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}

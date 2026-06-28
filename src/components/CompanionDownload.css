@@ -1,7 +1,66 @@
-.companion { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-.companion-title { font-size: 13px; font-weight: 500; margin-bottom: 0.5rem; }
-.companion-body { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem; }
-.companion-btns { display: flex; flex-direction: column; gap: 8px; margin-bottom: 0.75rem; }
-.companion-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--text); background: var(--surface-2); transition: border-color 0.15s; }
-.companion-btn:hover { border-color: var(--accent); color: var(--accent); }
-.companion-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+.companion {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.1rem 1.25rem;
+}
+
+/* Thin top rule as section header */
+.companion::before {
+  content: 'Companion app';
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.companion-title { display: none; } /* replaced by ::before */
+
+.companion-body {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+}
+
+.companion-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.companion-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-warm);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: transparent;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.companion-btn svg { flex-shrink: 0; opacity: 0.6; }
+
+.companion-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.companion-btn:hover svg { opacity: 1; }
+
+.companion-note {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
