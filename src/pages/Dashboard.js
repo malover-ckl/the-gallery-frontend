@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PreferencePanel from '../components/PreferencePanel';
 import AlbumGrid from '../components/AlbumGrid';
@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery]   = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching]       = useState(false);
+  const searchTimeout = useRef(null);
 
   // Load user + preferences
   useEffect(() => {
@@ -65,7 +66,6 @@ export default function Dashboard() {
     loadPreview();
   };
 
-  // Save custom layout to backend
   const saveLayout = async (newAlbums) => {
     await fetch(`${API}/api/layout/${userId}`, {
       method: 'POST',
@@ -78,7 +78,6 @@ export default function Dashboard() {
     setTimeout(() => setLayoutSaved(false), 2000);
   };
 
-  // Reset layout back to Spotify order
   const resetLayout = async () => {
     await fetch(`${API}/api/layout/${userId}`, {
       method: 'DELETE',
@@ -88,37 +87,38 @@ export default function Dashboard() {
     loadPreview();
   };
 
-  // Handle drag reorder
   const handleReorder = (newAlbums) => {
     setAlbums(newAlbums);
     saveLayout(newAlbums);
   };
 
-  // Open replace modal
   const handleReplace = (index) => {
     setReplaceIndex(index);
     setSearchQuery('');
     setSearchResults([]);
   };
 
-  // Search Spotify
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    setSearching(true);
-    try {
-      const r = await fetch(`${API}/api/search/${userId}?q=${encodeURIComponent(searchQuery)}`, {
-        credentials: 'include',
-      });
-      const data = await r.json();
-      setSearchResults(data.results || []);
-    } catch {
-      setSearchResults([]);
-    }
-    setSearching(false);
+  // Live search as you type
+  const handleSearchInput = (e) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    if (!q.trim()) { setSearchResults([]); return; }
+    searchTimeout.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const r = await fetch(`${API}/api/search/${userId}?q=${encodeURIComponent(q)}`, {
+          credentials: 'include',
+        });
+        const data = await r.json();
+        setSearchResults(data.results || []);
+      } catch {
+        setSearchResults([]);
+      }
+      setSearching(false);
+    }, 400);
   };
 
-  // Pick a replacement album
   const handlePick = (album) => {
     const newAlbums = [...albums];
     newAlbums[replaceIndex] = album;
@@ -134,7 +134,7 @@ export default function Dashboard() {
   };
 
   if (!userId) return <div className="dash-error">No user ID found. <a href="/">Go back</a></div>;
-  if (!user || !prefs) return <div className="dash-loading"><div className="spinner" />Loading your gallery…</div>;
+  if (!user || !prefs) return <div className="dash-loading"><div className="spinner" />Loading your gallery...</div>;
 
   return (
     <div className="dashboard">
@@ -173,7 +173,7 @@ export default function Dashboard() {
           </div>
 
           {loading
-            ? <div className="preview-loading"><div className="spinner" />Building preview…</div>
+            ? <div className="preview-loading"><div className="spinner" />Building preview...</div>
             : <AlbumGrid
                 albums={albums}
                 cols={prefs.grid_cols}
@@ -194,21 +194,23 @@ export default function Dashboard() {
               <h3>Replace album #{replaceIndex + 1}</h3>
               <button className="modal-close" onClick={() => setReplaceIndex(null)}>✕</button>
             </div>
-            <form className="modal-search" onSubmit={handleSearch}>
+            <div className="modal-search">
               <input
                 autoFocus
                 type="text"
-                placeholder="Search for an album…"
+                placeholder="Search for an album..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={handleSearchInput}
                 className="modal-input"
               />
-              <button type="submit" className="modal-search-btn" disabled={searching}>
-                {searching ? '…' : 'Search'}
-              </button>
-            </form>
+            </div>
             <div className="modal-results">
-              {searchResults.map((album, i) => (
+              {searching && (
+                <div className="modal-searching">
+                  <div className="spinner" /> Searching...
+                </div>
+              )}
+              {!searching && searchResults.map((album, i) => (
                 <div key={i} className="modal-result" onClick={() => handlePick(album)}>
                   <img src={album.url} alt={album.name} />
                   <div className="modal-result-info">
@@ -217,8 +219,11 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
-              {searchResults.length === 0 && !searching && searchQuery && (
+              {!searching && searchResults.length === 0 && searchQuery && (
                 <p className="modal-empty">No results found.</p>
+              )}
+              {!searching && !searchQuery && (
+                <p className="modal-empty">Start typing to search Spotify...</p>
               )}
             </div>
           </div>

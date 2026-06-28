@@ -14,8 +14,15 @@
 .dash-title { font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 4px; }
 .dash-subtitle { font-size: 12px; color: var(--text-muted); }
 
-.btn-download { background: var(--accent); color: #0a0a0a; font-size: 13px; font-weight: 500; padding: 10px 20px; border: none; border-radius: var(--radius); transition: opacity 0.15s; white-space: nowrap; }
+.dash-main-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+
+.btn-download { background: var(--accent); color: #0a0a0a; font-size: 13px; font-weight: 500; padding: 10px 20px; border: none; border-radius: var(--radius); transition: opacity 0.15s; white-space: nowrap; cursor: pointer; }
 .btn-download:hover { opacity: 0.85; }
+
+.btn-reset { background: transparent; color: var(--text-muted); font-size: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius); transition: all 0.15s; white-space: nowrap; cursor: pointer; }
+.btn-reset:hover { color: var(--text); border-color: var(--text-muted); }
+
+.layout-saved { font-size: 12px; color: var(--accent); }
 
 .preview-loading { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 14px; padding: 4rem 0; }
 
@@ -25,6 +32,89 @@
 .dash-loading { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 100vh; color: var(--text-muted); font-size: 14px; }
 .dash-error { display: flex; align-items: center; justify-content: center; min-height: 100vh; color: var(--text-muted); font-size: 14px; gap: 8px; }
 .dash-error a { color: var(--accent); }
+
+/* ── Replace modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-header h3 { font-family: var(--font-serif); font-size: 1rem; margin: 0; }
+.modal-close { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px; line-height: 1; }
+.modal-close:hover { color: var(--text); }
+
+.modal-search {
+  display: flex;
+  gap: 8px;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+.modal-input:focus { border-color: var(--accent); }
+
+/* Search results as small grid */
+.modal-results {
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.modal-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.modal-result:hover { transform: scale(1.05); opacity: 0.9; }
+.modal-result img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; border-radius: 3px; }
+.modal-result-info { padding: 2px 2px 4px; }
+.modal-result-name { font-size: 10px; font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.modal-result-artist { font-size: 10px; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.modal-empty { font-size: 13px; color: var(--text-muted); padding: 1rem; text-align: center; grid-column: 1 / -1; }
+.modal-searching { font-size: 13px; color: var(--text-muted); padding: 1rem; text-align: center; grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 @media (max-width: 900px) {
   .dash-body { grid-template-columns: 1fr; }
