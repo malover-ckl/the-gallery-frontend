@@ -1,6 +1,6 @@
 .album-grid-wrap { }
 
-/* Hint bar when a cell is selected for swapping */
+/* Hint shown when a cell is selected for swapping */
 .grid-hint {
   font-size: 11px;
   color: var(--accent);
@@ -13,7 +13,7 @@
   background: var(--accent-dim);
 }
 
-/* The grid itself */
+/* Grid */
 .album-grid {
   display: grid;
   background: #000;
@@ -21,54 +21,55 @@
   overflow: hidden;
 }
 
-/* Individual cell */
+/* Cell */
 .album-cell {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--surface-2);
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
 }
+
+.album-cell:active { cursor: grabbing; }
 
 .album-cell img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition: transform 0.25s ease, filter 0.25s ease;
   will-change: transform;
+  pointer-events: none;
 }
 
-/* Selected state (swap mode) */
-.album-cell.selected img {
-  filter: brightness(0.55);
-}
-.album-cell.selected::after {
+/* Drag-over target highlight */
+.album-cell.drag-over::after {
   content: '';
   position: absolute;
   inset: 0;
   border: 2px solid var(--accent);
   pointer-events: none;
-  z-index: 3;
+  z-index: 4;
 }
 
 /* Empty slot */
 .album-empty {
   width: 100%;
   height: 100%;
-  background: #0e0d0b;
+  background: #0c0c0c;
 }
 
-/* Rank badge — top-left, like a vinyl price sticker */
+/* Rank badge */
 .album-rank {
   position: absolute;
   top: 5px;
   left: 5px;
-  background: rgba(14,13,11,0.78);
-  color: var(--accent);
+  background: rgba(12,12,12,0.72);
+  color: rgba(237,234,229,0.85);
   font-size: 9px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   padding: 2px 5px;
   border-radius: 2px;
   z-index: 3;
@@ -77,87 +78,60 @@
   -webkit-backdrop-filter: blur(4px);
 }
 
-/* Cinematic hover overlay */
-.album-actions {
+/* Hover overlay — shows only a replace hint, no buttons */
+.album-overlay {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: rgba(10,9,8,0.72);
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 7px;
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 2;
-}
-
-.album-cell:hover img {
-  transform: scale(1.05);
-  filter: brightness(0.7);
-}
-.album-cell:hover .album-actions { opacity: 1; }
-
-/* Move / Replace as ghost text labels, not pill buttons */
-.btn-move,
-.btn-replace {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.9);
-  transition: color 0.15s;
-  line-height: 1;
-}
-
-.btn-move::before {
-  content: '';
-  display: block;
-  width: 12px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.6;
-}
-.btn-move::after {
-  content: '';
-  display: block;
-  width: 12px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.6;
-}
-
-.btn-replace {
-  color: rgba(200,184,154,0.9);
-}
-
-.btn-move:hover { color: #fff; }
-.btn-replace:hover { color: var(--accent); }
-
-/* Divider between the two actions */
-.album-actions::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 20%;
-  right: 20%;
-  height: 1px;
-  background: rgba(255,255,255,0.08);
-  transform: translateY(-50%);
   pointer-events: none;
 }
 
+/* Replace icon in bottom-right corner on hover */
+.album-overlay-icon {
+  width: 22px;
+  height: 22px;
+  background: rgba(12,12,12,0.78);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: all;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.album-overlay-icon svg {
+  width: 11px;
+  height: 11px;
+  stroke: rgba(237,234,229,0.7);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.album-cell:hover img {
+  transform: scale(1.04);
+  filter: brightness(0.82);
+}
+.album-cell:hover .album-overlay { opacity: 1; }
+.album-overlay-icon:hover {
+  background: rgba(40,40,40,0.92);
+  transform: scale(1.12);
+}
+.album-overlay-icon:hover svg { stroke: var(--text); }
+
 /* Footnote */
 .grid-note {
-  margin-top: 0.75rem;
+  margin-top: 0.65rem;
   font-size: 11px;
   color: var(--text-dim);
   letter-spacing: 0.03em;
