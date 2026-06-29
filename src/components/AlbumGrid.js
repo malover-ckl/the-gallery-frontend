@@ -1,4 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  rectSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import './AlbumGrid.css';
 
 function ReplaceIcon() {
@@ -11,180 +26,224 @@ function ReplaceIcon() {
   );
 }
 
-// Compute popover position and pass the exact caret location as a CSS variable
 function getPopoverStyle(i, cols, rows) {
   const col = i % cols;
   const row = Math.floor(i / cols);
-
-  // Vertical: bottom 2 rows → open upward
   const isBottomRow = row >= rows - 2;
   const vertical = isBottomRow
     ? { bottom: 'calc(100% + 8px)', top: 'auto' }
-    : { top: 'calc(100% + 8px)',    bottom: 'auto' };
+    : { top: 'calc(100% + 8px)', bottom: 'auto' };
 
-  // Horizontal: Calculate shift percentage based on column position
-  // 50% is perfectly centered. We shift left/right for edges.
   let shiftPercent = 50;
-  if (col === 0) shiftPercent = 12; // Far left edge
-  else if (col === 1 && cols > 4) shiftPercent = 25; // Left inner
-  else if (col === cols - 2 && cols > 4) shiftPercent = 75; // Right inner
-  else if (col === cols - 1) shiftPercent = 88; // Far right edge
+  if (col === 0) shiftPercent = 12;
+  else if (col === 1 && cols > 4) shiftPercent = 25;
+  else if (col === cols - 2 && cols > 4) shiftPercent = 75;
+  else if (col === cols - 1) shiftPercent = 88;
 
   return {
     ...vertical,
     left: '50%',
     transform: `translateX(-${shiftPercent}%)`,
-    '--arrow-x': `${shiftPercent}%` // CSS Variable to sync the caret position
+    '--arrow-x': `${shiftPercent}%`
   };
 }
 
-// Simplified since the horizontal logic is handled by the CSS variable now
 function getPopoverClass(i, cols, rows) {
   const row = Math.floor(i / cols);
   const isBottomRow = row >= rows - 2;
   return `replace-popover arrow-${isBottomRow ? 'bottom' : 'top'}`;
 }
 
-export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplace, replaceIndex, searchQuery, searchResults, searching, onSearchInput, onPick, onCloseReplace }) {
-  const total      = cols * rows;
-  const cells      = Array.from({ length: total }, (_, i) => albums[i] || null);
-  const dragIndex  = useRef(null);
-  const [dragOver, setDragOver] = useState(null);
-  const cellRefs   = useRef([]);
-  const popoverRef = useRef(null);
+// ── NEW: Sortable Cell Component ──
+function SortableAlbumCell({
+  id, album, index, isReplacing, onReplaceClick, 
+  popoverProps, cols, rows
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id });
 
-  const handleDragStart = (e, i) => {
-    dragIndex.current = i;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setDragImage(e.currentTarget, 20, 20);
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 10 : 1, // Elevate while dragging
+    opacity: isDragging ? 0.8 : 1,
   };
 
-  const handleDragOver = (e, i) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    if (dragOver !== i) setDragOver(i);
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`album-cell ${isReplacing ? ' replacing' : ''}`}
+      title={album ? `${album.artist} — ${album.name}` : ''}
+      {...attributes}
+      {...listeners}
+    >
+      {album ? (
+        <img src={album.url} alt={album.name} loading="lazy" draggable={false} />
+      ) : (
+        <div className="album-empty" />
+      )}
+      
+      {index < 10 && album && <span className="album-rank">#{index + 1}</span>}
+      
+      <div className="album-overlay">
+        <div
+          className="album-overlay-icon"
+          onPointerDown={(e) => {
+            // Use onPointerDown to prevent dnd-kit from intercepting the click
+            e.stopPropagation(); 
+            onReplaceClick(index);
+          }}
+          title="Replace this album"
+        >
+          <ReplaceIcon />
+        </div>
+      </div>
+
+      {isReplacing && (
+        <div
+          className={getPopoverClass(index, cols, rows)}
+          style={getPopoverStyle(index, cols, rows)}
+          onPointerDown={e => e.stopPropagation()} // Prevent drag when interacting with popover
+        >
+          {/* Popover content rendered from parent props for cleaner separation */}
+          {popoverProps.children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function AlbumGrid({
+  albums, cols, rows, gap, onReorder, onReplace, replaceIndex,
+  searchQuery, searchResults, searching, onSearchInput, onPick, onCloseReplace
+}) {
+  const total = cols * rows;
+  // Pad the array with empty slots and ensure every item has a unique ID for dnd-kit
+  const items = Array.from({ length: total }, (_, i) => ({
+    id: albums[i]?.id || `slot-${i}`, // Use Spotify ID if available, otherwise slot index
+    album: albums[i] || null,
+    originalIndex: i
+  }));
+
+  const [activeId, setActiveId] = useState(null);
+  const containerRef = useRef(null);
+
+  // Use a pointer sensor with a slight activation constraint so clicking the replace icon isn't mistaken for a drag
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
   };
 
-  const handleDrop = (e, i) => {
-    e.preventDefault();
-    setDragOver(null);
-    if (dragIndex.current === null || dragIndex.current === i) return;
-    const newAlbums = [...albums];
-    const from = dragIndex.current;
-    [newAlbums[from], newAlbums[i]] = [newAlbums[i], newAlbums[from]];
-    dragIndex.current = null;
-    onReorder(newAlbums);
+  const handleDragEnd = (event) => {
+    setActiveId(null);
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = items.findIndex(item => item.id === active.id);
+      const newIndex = items.findIndex(item => item.id === over.id);
+      
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      // Map back to just the album objects before passing to Dashboard
+      onReorder(newItems.map(item => item.album));
+    }
   };
 
-  const handleDragEnd = () => {
-    setDragOver(null);
-    dragIndex.current = null;
-  };
-
-  const handleReplaceClick = (e, i) => {
-    e.stopPropagation();
-    onReplace(i);
-  };
-
-  // Close popover on outside click — works even when typing in the input
+  // Close popover on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      const cell = cellRefs.current[replaceIndex];
-      if (cell && !cell.contains(e.target)) {
+      if (replaceIndex !== null && containerRef.current && !containerRef.current.contains(e.target)) {
         onCloseReplace();
       }
     };
-    if (replaceIndex !== null) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [replaceIndex, onCloseReplace]);
 
-  return (
-    <div className="album-grid-wrap">
-      <div
-        className={`album-grid ${replaceIndex !== null ? 'has-active-popover' : ''}`}
-        style={{
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gap: `${gap}px`,
-        }}
-      >
-        {cells.map((album, i) => (
-          <div
-            key={i}
-            ref={el => cellRefs.current[i] = el}
-            className={`album-cell${dragOver === i ? ' drag-over' : ''}${replaceIndex === i ? ' replacing' : ''}`}
-            title={album ? `${album.artist} — ${album.name}` : ''}
-            draggable
-            onDragStart={(e) => handleDragStart(e, i)}
-            onDragOver={(e)  => handleDragOver(e, i)}
-            onDrop={(e)      => handleDrop(e, i)}
-            onDragEnd={handleDragEnd}
-          >
-            {album
-              ? <img src={album.url} alt={album.name} loading="lazy" draggable={false} />
-              : <div className="album-empty" />
-            }
-            {i < 10 && album && (
-              <span className="album-rank">#{i + 1}</span>
-            )}
-            <div className="album-overlay">
-              <div
-                className="album-overlay-icon"
-                onClick={(e) => handleReplaceClick(e, i)}
-                title="Replace this album"
-              >
-                <ReplaceIcon />
-              </div>
-            </div>
+  const activeItem = items.find(item => item.id === activeId);
 
-            {replaceIndex === i && (
-              <div
-                className={getPopoverClass(i, cols, rows)}
-                style={getPopoverStyle(i, cols, rows)}
-                ref={popoverRef}
-                onMouseDown={e => e.stopPropagation()}
-              >
-                <div className="popover-search">
-                  <input
-                    autoFocus
-                    type="text"
-                    placeholder="Search albums..."
-                    value={searchQuery}
-                    onChange={onSearchInput}
-                    className="popover-input"
-                    /* Obfuscated names to bypass browser autocomplete */
-                    name="search-album-field-no-fill" 
-                    id="search-album-field-no-fill"
-                    autoComplete="nope" 
-                    autoCorrect="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    data-gramm="false" 
-                    data-gramm_editor="false"
-                    data-1p-ignore="true" 
-                  />
-                  <button className="popover-close" onClick={onCloseReplace}>✕</button>
-                </div>
-                <div className="popover-results">
-                  {searching && <div className="popover-status">Searching...</div>}
-                  {!searching && !searchQuery && <div className="popover-status">Start typing to search Spotify</div>}
-                  {!searching && searchQuery && searchResults.length === 0 && <div className="popover-status">No results found</div>}
-                  {!searching && searchResults.map((album, j) => (
-                    <div key={j} className="popover-result" onClick={() => onPick(album)}>
-                      <img src={album.url} alt={album.name} />
-                      <div className="popover-result-info">
-                        <span className="popover-result-name">{album.name}</span>
-                        <span className="popover-result-artist">{album.artist}</span>
+  return (
+    <div className="album-grid-wrap" ref={containerRef}>
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div
+          className={`album-grid ${replaceIndex !== null ? 'has-active-popover' : ''}`}
+          style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: `${gap}px` }}
+        >
+          <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
+            {items.map((item, i) => (
+              <SortableAlbumCell
+                key={item.id}
+                id={item.id}
+                album={item.album}
+                index={i}
+                cols={cols}
+                rows={rows}
+                isReplacing={replaceIndex === i}
+                onReplaceClick={onReplace}
+                popoverProps={{
+                  children: (
+                    <>
+                      <div className="popover-search">
+                        <input
+                          autoFocus
+                          type="text"
+                          placeholder="Search albums..."
+                          value={searchQuery}
+                          onChange={onSearchInput}
+                          className="popover-input"
+                        />
+                        <button className="popover-close" onClick={onCloseReplace}>✕</button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+                      <div className="popover-results">
+                        {searching && <div className="popover-status">Searching...</div>}
+                        {!searching && !searchQuery && <div className="popover-status">Start typing to search Spotify</div>}
+                        {!searching && searchQuery && searchResults.length === 0 && <div className="popover-status">No results found</div>}
+                        {!searching && searchResults.map((resultAlbum, j) => (
+                          <div key={j} className="popover-result" onClick={() => onPick(resultAlbum)}>
+                            <img src={resultAlbum.url} alt={resultAlbum.name} />
+                            <div className="popover-result-info">
+                              <span className="popover-result-name">{resultAlbum.name}</span>
+                              <span className="popover-result-artist">{resultAlbum.artist}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )
+                }}
+              />
+            ))}
+          </SortableContext>
+        </div>
+        
+        {/* The DragOverlay shows a "ghost" of the item being dragged */}
+        <DragOverlay>
+          {activeItem ? (
+            <div className="album-cell" style={{ transform: 'scale(1.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+               {activeItem.album ? <img src={activeItem.album.url} alt="" /> : <div className="album-empty" />}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+
       <div className="grid-footer">
         <p className="grid-note">
           {albums.length} of {total} slots · drag to reorder · click icon to replace
