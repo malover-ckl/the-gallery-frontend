@@ -25,8 +25,8 @@ export default function Home() {
         <div className="hero-text">
           <p className="hero-eyebrow">Your taste, on display.</p>
           <h1 className="hero-headline">
-            Your most played songs,<br />
-            <em>front and center<br />listening to.</em>
+            Your most<br />played albums,</em>
+            <em>front and center<br />
           </h1>
           <p className="hero-body">
             The Gallery pulls your Spotify top albums and turns them into a
