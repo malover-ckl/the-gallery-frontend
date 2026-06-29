@@ -23,10 +23,10 @@ export default function Home() {
 
       <main className="hero">
         <div className="hero-text">
-          <p className="hero-eyebrow">Your music. On display.</p>
+          <p className="hero-eyebrow">Your taste, on display.</p>
           <h1 className="hero-headline">
-            The wallpaper that knows<br />
-            <em>what you've been<br />listening to.</em>
+            Your most played songs,<br />
+            <em>front and center<br />listening to.</em>
           </h1>
           <p className="hero-body">
             The Gallery pulls your Spotify top albums and turns them into a
