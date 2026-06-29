@@ -11,33 +11,28 @@ export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const userId         = searchParams.get('user_id');
 
-  const [user, setUser]             = useState(null);
-  const [albums, setAlbums]         = useState([]);
-  const [loading, setLoading]       = useState(false);
-  const [prefs, setPrefs]           = useState(null);
-  const [saved, setSaved]           = useState(false);
-  const [isCustom, setIsCustom]     = useState(false);
+  const [user, setUser]               = useState(null);
+  const [albums, setAlbums]           = useState([]);
+  const [loading, setLoading]         = useState(false);
+  const [prefs, setPrefs]             = useState(null);
+  const [saved, setSaved]             = useState(false);
+  const [isCustom, setIsCustom]       = useState(false);
   const [layoutSaved, setLayoutSaved] = useState(false);
 
-  // Search modal state
-  const [replaceIndex, setReplaceIndex] = useState(null);
-  const [searchQuery, setSearchQuery]   = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching]       = useState(false);
+  // Replace popover state
+  const [replaceIndex, setReplaceIndex]     = useState(null);
+  const [searchQuery, setSearchQuery]       = useState('');
+  const [searchResults, setSearchResults]   = useState([]);
+  const [searching, setSearching]           = useState(false);
   const searchTimeout = useRef(null);
 
-  // Load user + preferences
   useEffect(() => {
     if (!userId) return;
     fetch(`${API}/auth/user/${userId}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(data => {
-        setUser(data);
-        setPrefs(data.preferences);
-      });
+      .then(data => { setUser(data); setPrefs(data.preferences); });
   }, [userId]);
 
-  // Load album preview
   const loadPreview = useCallback(() => {
     if (!userId) return;
     setLoading(true);
@@ -87,6 +82,11 @@ export default function Dashboard() {
     loadPreview();
   };
 
+  const handleReorder = (newAlbums) => {
+    setAlbums(newAlbums);
+    saveLayout(newAlbums);
+  };
+
   const handleShuffle = () => {
     const shuffled = [...albums];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -96,18 +96,18 @@ export default function Dashboard() {
     handleReorder(shuffled);
   };
 
-  const handleReorder = (newAlbums) => {
-    setAlbums(newAlbums);
-    saveLayout(newAlbums);
-  };
-
   const handleReplace = (index) => {
-    setReplaceIndex(index);
+    setReplaceIndex(index === replaceIndex ? null : index);
     setSearchQuery('');
     setSearchResults([]);
   };
 
-  // Live search as you type
+  const handleCloseReplace = () => {
+    setReplaceIndex(null);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
   const handleSearchInput = (e) => {
     const q = e.target.value;
     setSearchQuery(q);
@@ -190,54 +190,17 @@ export default function Dashboard() {
                 gap={prefs.gap_px}
                 onReorder={handleReorder}
                 onReplace={handleReplace}
+                replaceIndex={replaceIndex}
+                searchQuery={searchQuery}
+                searchResults={searchResults}
+                searching={searching}
+                onSearchInput={handleSearchInput}
+                onPick={handlePick}
+                onCloseReplace={handleCloseReplace}
               />
           }
         </main>
       </div>
-
-      {/* Replace modal */}
-      {replaceIndex !== null && (
-        <div className="modal-backdrop" onClick={() => setReplaceIndex(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Replace album #{replaceIndex + 1}</h3>
-              <button className="modal-close" onClick={() => setReplaceIndex(null)}>✕</button>
-            </div>
-            <div className="modal-search">
-              <input
-                autoFocus
-                type="text"
-                placeholder="Search for an album..."
-                value={searchQuery}
-                onChange={handleSearchInput}
-                className="modal-input"
-              />
-            </div>
-            <div className="modal-results">
-              {searching && (
-                <div className="modal-searching">
-                  <div className="spinner" /> Searching...
-                </div>
-              )}
-              {!searching && searchResults.map((album, i) => (
-                <div key={i} className="modal-result" onClick={() => handlePick(album)}>
-                  <img src={album.url} alt={album.name} />
-                  <div className="modal-result-info">
-                    <span className="modal-result-name">{album.name}</span>
-                    <span className="modal-result-artist">{album.artist}</span>
-                  </div>
-                </div>
-              ))}
-              {!searching && searchResults.length === 0 && searchQuery && (
-                <p className="modal-empty">No results found.</p>
-              )}
-              {!searching && !searchQuery && (
-                <p className="modal-empty">Start typing to search Spotify...</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
