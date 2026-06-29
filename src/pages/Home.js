@@ -4,11 +4,12 @@ import './Home.css';
 const API = process.env.REACT_APP_API_URL || '';
 
 const MOSAIC_COLORS = [
-  '#2d1f3d','#1a2d1f','#3d1f1f','#1f2d3d','#2d2d1f','#1f3d2d',
-  '#3d2d1f','#1f1f3d','#2d3d1f','#3d1f2d','#1f3d3d','#2d1f1f',
-  '#1a1a2d','#2d1a1a','#1a2d2d','#3d3d1f','#1f2d1f','#2d1f3d',
-  '#1f3d1f','#3d1f3d','#1a3d1a','#3d2d2d','#1f1f2d','#2d3d2d',
-  '#1a1f3d','#3d1a1a','#2d2d3d','#1f3d2d','#3d2d1a','#1a2d3d',
+  '#1DB954','#121212','#1ed760','#2d0a3d','#0d3d1a',
+  '#ff6eb4','#121212','#1DB954','#1a3d0d','#3d0d2d',
+  '#121212','#1ed760','#0a1a0d','#ff6eb4','#1DB954',
+  '#1a0d3d','#0d3d1a','#121212','#ff4da6','#1DB954',
+  '#2d1a00','#1ed760','#121212','#3d0a1a','#0d2d0d',
+  '#ff6eb4','#1DB954','#121212','#1a3d2d','#ff4da6',
 ];
 
 export default function Home() {
