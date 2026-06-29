@@ -5,11 +5,11 @@ const API = process.env.REACT_APP_API_URL || '';
 
 const MOSAIC_COLORS = [
 '#ffd166', '#ffb5a7', '#ef6c9f', '#9da9df', '#a8dadc', 
-'#06d6a0','#f8edeb', '#e9c46a', '#f4a261', '#eaac8b', 
-'#b56576','#c5c3c6','#ff4856', '#d90429', '#a93b4e', 
-'#6d597a','#395faf','#395faf','#9a031e', '#355070',
-'#1d3557', '#457b9d','#118ab2', '#073b4c','#1da24b',
-'#00a970', '#009c78', '#2a9d8f', '#264653', '#2f4858'
+'#a8dadc', '#ef6c9f', '#ffd166', '#06d6a0', '#9da9df',
+'#06d6a0', '#ffd166', '#9da9df', '#a8dadc', '#ef6c9f', 
+'#ef6c9f', '#9da9df', '#a8dadc', '#ffd166', '#06d6a0',
+'#9da9df', '#06d6a0', '#ef6c9f', '#ffd166', '#a8dadc',
+'#ffd166', '#a8dadc', '#06d6a0', '#9da9df', '#ef6c9f'
 ];
 
 export default function Home() {
