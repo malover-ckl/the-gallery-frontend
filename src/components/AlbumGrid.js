@@ -54,7 +54,6 @@ function getPopoverClass(i, cols, rows) {
   return `replace-popover arrow-${isBottomRow ? 'bottom' : 'top'}`;
 }
 
-// ── NEW: Sortable Cell Component ──
 function SortableAlbumCell({
   id, album, index, isReplacing, onReplaceClick, 
   popoverProps, cols, rows
@@ -71,7 +70,7 @@ function SortableAlbumCell({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 10 : 1, // Elevate while dragging
+    zIndex: isDragging ? 10 : 1,
     opacity: isDragging ? 0.8 : 1,
   };
 
@@ -96,7 +95,6 @@ function SortableAlbumCell({
         <div
           className="album-overlay-icon"
           onPointerDown={(e) => {
-            // Use onPointerDown to prevent dnd-kit from intercepting the click
             e.stopPropagation(); 
             onReplaceClick(index);
           }}
@@ -110,9 +108,8 @@ function SortableAlbumCell({
         <div
           className={getPopoverClass(index, cols, rows)}
           style={getPopoverStyle(index, cols, rows)}
-          onPointerDown={e => e.stopPropagation()} // Prevent drag when interacting with popover
+          onPointerDown={e => e.stopPropagation()}
         >
-          {/* Popover content rendered from parent props for cleaner separation */}
           {popoverProps.children}
         </div>
       )}
@@ -125,9 +122,8 @@ export default function AlbumGrid({
   searchQuery, searchResults, searching, onSearchInput, onPick, onCloseReplace
 }) {
   const total = cols * rows;
-  // Pad the array with empty slots and ensure every item has a unique ID for dnd-kit
   const items = Array.from({ length: total }, (_, i) => ({
-    id: albums[i]?.id || `slot-${i}`, // Use Spotify ID if available, otherwise slot index
+    id: albums[i]?.id || `slot-${i}`,
     album: albums[i] || null,
     originalIndex: i
   }));
@@ -135,7 +131,6 @@ export default function AlbumGrid({
   const [activeId, setActiveId] = useState(null);
   const containerRef = useRef(null);
 
-  // Use a pointer sensor with a slight activation constraint so clicking the replace icon isn't mistaken for a drag
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -157,12 +152,10 @@ export default function AlbumGrid({
       const newIndex = items.findIndex(item => item.id === over.id);
       
       const newItems = arrayMove(items, oldIndex, newIndex);
-      // Map back to just the album objects before passing to Dashboard
       onReorder(newItems.map(item => item.album));
     }
   };
 
-  // Close popover on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (replaceIndex !== null && containerRef.current && !containerRef.current.contains(e.target)) {
@@ -234,7 +227,6 @@ export default function AlbumGrid({
           </SortableContext>
         </div>
         
-        {/* The DragOverlay shows a "ghost" of the item being dragged */}
         <DragOverlay>
           {activeItem ? (
             <div className="album-cell" style={{ transform: 'scale(1.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
