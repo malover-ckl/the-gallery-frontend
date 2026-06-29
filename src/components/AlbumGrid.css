@@ -129,12 +129,12 @@
   box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(200,184,154,0.08);
   z-index: 200;
   overflow: hidden;
-  animation: popIn 0.15s ease;
+  animation: popIn 0.12s ease;
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Arrow pointing UP (popover opens below cell) */
@@ -165,14 +165,6 @@
   z-index: 1;
 }
 
-/* Flip animation for upward popovers */
-.replace-popover.arrow-bottom {
-  animation: popInUp 0.15s ease;
-}
-@keyframes popInUp {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 /* Horizontal arrow position */
 .arrow-top.arrow-h-center::before,

@@ -95,13 +95,11 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
     onReplace(i);
   };
 
-  // Close popover on outside click
+  // Close popover on outside click — works even when typing in the input
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        popoverRef.current && !popoverRef.current.contains(e.target) &&
-        cellRefs.current[replaceIndex] && !cellRefs.current[replaceIndex].contains(e.target)
-      ) {
+      const cell = cellRefs.current[replaceIndex];
+      if (cell && !cell.contains(e.target)) {
         onCloseReplace();
       }
     };
@@ -154,7 +152,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
                 className={getPopoverClass(i, cols, rows)}
                 style={getPopoverStyle(i, cols, rows)}
                 ref={popoverRef}
-                onClick={e => e.stopPropagation()}
+                onMouseDown={e => e.stopPropagation()}
               >
                 <div className="popover-search">
                   <input
