@@ -32,8 +32,7 @@ function getPopoverStyle(i, cols, rows) {
   return {
     ...vertical,
     left: '50%',
-    // We export the horizontal shift as a CSS variable instead of a strict transform
-    '--popover-x': `-${shiftPercent}%`, 
+    transform: `translateX(-${shiftPercent}%)`, // Handled entirely by JS now
     '--arrow-x': `${shiftPercent}%` 
   };
 }
