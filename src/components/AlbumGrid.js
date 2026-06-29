@@ -153,13 +153,10 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
                     value={searchQuery}
                     onChange={onSearchInput}
                     className="popover-input"
-                    autoComplete="nope" 
+                    autoComplete="off"
                     autoCorrect="off"
-                    autoCapitalize="none"
-                    spellCheck={false}
-                    data-gramm="false" 
-                    data-gramm_editor="false"
-                    data-1p-ignore="true" 
+                    spellCheck="false"
+                    autoCapitalize="off"
                   />
                   <button className="popover-close" onClick={onCloseReplace}>✕</button>
                 </div>
