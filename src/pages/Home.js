@@ -3,23 +3,34 @@ import './Home.css';
 
 const API = process.env.REACT_APP_API_URL || '';
 
+const MOSAIC_COLORS = [
+  '#2d1f3d','#1a2d1f','#3d1f1f','#1f2d3d','#2d2d1f','#1f3d2d',
+  '#3d2d1f','#1f1f3d','#2d3d1f','#3d1f2d','#1f3d3d','#2d1f1f',
+  '#1a1a2d','#2d1a1a','#1a2d2d','#3d3d1f','#1f2d1f','#2d1f3d',
+  '#1f3d1f','#3d1f3d','#1a3d1a','#3d2d2d','#1f1f2d','#2d3d2d',
+  '#1a1f3d','#3d1a1a','#2d2d3d','#1f3d2d','#3d2d1a','#1a2d3d',
+];
+
 export default function Home() {
   return (
     <div className="home">
       <nav className="nav">
         <span className="nav-logo">The Gallery</span>
+        <a href={`${API}/auth/login`} className="nav-cta">
+          Connect with Spotify
+        </a>
       </nav>
 
       <main className="hero">
         <div className="hero-text">
           <p className="hero-eyebrow">Your music. On display.</p>
           <h1 className="hero-headline">
-            Your listening history,<br />
-            <em>hung on your walls.</em>
+            The wallpaper that knows<br />
+            <em>what you've been<br />listening to.</em>
           </h1>
           <p className="hero-body">
-            The Gallery turns your Spotify top albums into a living wallpaper
-            that updates automatically as your taste evolves.
+            The Gallery pulls your Spotify top albums and turns them into a
+            stunning mosaic wallpaper — curated by your taste, updated as it evolves.
           </p>
           <a href={`${API}/auth/login`} className="btn-connect">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -27,12 +38,23 @@ export default function Home() {
             </svg>
             Connect with Spotify
           </a>
+          <p className="hero-fine">Free. No credit card. Read-only Spotify access.</p>
         </div>
 
-        <div className="hero-mosaic">
-          {Array.from({ length: 30 }).map((_, i) => (
-            <div key={i} className="mosaic-cell" style={{ animationDelay: `${i * 0.08}s` }} />
-          ))}
+        <div className="hero-visual">
+          <div className="mosaic-glow" />
+          <div className="hero-mosaic">
+            {MOSAIC_COLORS.map((color, i) => (
+              <div
+                key={i}
+                className="mosaic-cell"
+                style={{
+                  background: color,
+                  animationDelay: `${i * 0.06}s`,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </main>
 
@@ -41,17 +63,17 @@ export default function Home() {
           <div className="how-step">
             <span className="how-num">01</span>
             <h3>Connect Spotify</h3>
-            <p>Log in and grant read access to your top tracks. Nothing is stored beyond what's needed.</p>
+            <p>Log in and grant read access to your top tracks. We only read — never write.</p>
           </div>
           <div className="how-step">
             <span className="how-num">02</span>
-            <h3>Choose your layout</h3>
-            <p>Pick your grid size, time range, and canvas resolution. Preview your wallpaper before downloading.</p>
+            <h3>Curate your grid</h3>
+            <p>Drag to reorder, replace albums you don't want, and pick your layout and resolution.</p>
           </div>
           <div className="how-step">
             <span className="how-num">03</span>
-            <h3>Install the companion</h3>
-            <p>A small background app refreshes your wallpaper automatically as your listening changes.</p>
+            <h3>Set it and forget it</h3>
+            <p>Install the companion app and your wallpaper refreshes automatically as your taste shifts.</p>
           </div>
         </div>
       </section>

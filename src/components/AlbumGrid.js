@@ -11,15 +11,6 @@ function ReplaceIcon() {
   );
 }
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplace }) {
   const total     = cols * rows;
   const cells     = Array.from({ length: total }, (_, i) => albums[i] || null);
@@ -57,10 +48,6 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
   const handleReplaceClick = (e, i) => {
     e.stopPropagation();
     onReplace(i);
-  };
-
-  const handleShuffle = () => {
-    onReorder(shuffle(albums));
   };
 
   return (
@@ -106,15 +93,6 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
         <p className="grid-note">
           {albums.length} of {total} slots · drag to reorder · click icon to replace
         </p>
-        <button className="btn-shuffle" onClick={handleShuffle} title="Shuffle order">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="16 3 21 3 21 8"/>
-            <line x1="4" y1="20" x2="21" y2="3"/>
-            <polyline points="21 16 21 21 16 21"/>
-            <line x1="15" y1="15" x2="21" y2="21"/>
-          </svg>
-          Shuffle
-        </button>
       </div>
     </div>
   );

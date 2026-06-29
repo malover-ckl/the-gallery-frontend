@@ -87,6 +87,15 @@ export default function Dashboard() {
     loadPreview();
   };
 
+  const handleShuffle = () => {
+    const shuffled = [...albums];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    handleReorder(shuffled);
+  };
+
   const handleReorder = (newAlbums) => {
     setAlbums(newAlbums);
     saveLayout(newAlbums);
@@ -147,7 +156,7 @@ export default function Dashboard() {
 
       <div className="dash-body">
         <aside className="dash-sidebar">
-          <PreferencePanel prefs={prefs} onSave={savePrefs} saved={saved} />
+          <PreferencePanel prefs={prefs} onSave={savePrefs} saved={saved} onShuffle={handleShuffle} />
           <CompanionDownload userId={userId} apiUrl={API} />
         </aside>
 

@@ -32,7 +32,7 @@ const INTERVALS = [
   { value: 24, label: 'Daily' },
 ];
 
-export default function PreferencePanel({ prefs, onSave, saved }) {
+export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCustom }) {
   const [local, setLocal] = useState({ ...prefs });
 
   const set = (key, val) => setLocal(p => ({ ...p, [key]: val }));
@@ -117,6 +117,20 @@ export default function PreferencePanel({ prefs, onSave, saved }) {
       <button className="btn-save" onClick={() => onSave(local)}>
         {saved ? '✓ Saved' : 'Apply & preview'}
       </button>
+
+      {/* Shuffle button in sidebar */}
+      <div className="pref-group" style={{ marginTop: '0.5rem' }}>
+        <label className="pref-label">Layout</label>
+        <button className="btn-shuffle-sidebar" onClick={onShuffle}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+          Shuffle order
+        </button>
+      </div>
     </div>
   );
 }
