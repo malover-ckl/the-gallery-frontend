@@ -11,7 +11,7 @@ function ReplaceIcon() {
   );
 }
 
-// Compute popover position so it never clips off any edge
+// Compute popover position and pass the exact caret location as a CSS variable
 function getPopoverStyle(i, cols, rows) {
   const col = i % cols;
   const row = Math.floor(i / cols);
@@ -19,39 +19,30 @@ function getPopoverStyle(i, cols, rows) {
   // Vertical: bottom 2 rows → open upward
   const isBottomRow = row >= rows - 2;
   const vertical = isBottomRow
-    ? { bottom: 'calc(100% + 6px)', top: 'auto' }
-    : { top: 'calc(100% + 6px)',    bottom: 'auto' };
+    ? { bottom: 'calc(100% + 8px)', top: 'auto' }
+    : { top: 'calc(100% + 8px)',    bottom: 'auto' };
 
-  // Horizontal: figure out how far to shift left/right
-  // Default: centered on the cell (translateX -50%)
-  // Left edge (col 0): anchor to left side of cell
-  // Right edge (last 2 cols): anchor to right side of cell
-  let horizontal = {};
-  if (col === 0) {
-    horizontal = { left: 0, right: 'auto', transform: 'none' };
-  } else if (col >= cols - 2) {
-    horizontal = { right: 0, left: 'auto', transform: 'none' };
-  } else {
-    horizontal = { left: '50%', right: 'auto', transform: 'translateX(-50%)' };
-  }
+  // Horizontal: Calculate shift percentage based on column position
+  // 50% is perfectly centered. We shift left/right for edges.
+  let shiftPercent = 50;
+  if (col === 0) shiftPercent = 12; // Far left edge
+  else if (col === 1 && cols > 4) shiftPercent = 25; // Left inner
+  else if (col === cols - 2 && cols > 4) shiftPercent = 75; // Right inner
+  else if (col === cols - 1) shiftPercent = 88; // Far right edge
 
-  // Arrow position hint (passed as data attr via className)
-  return { ...vertical, ...horizontal };
+  return {
+    ...vertical,
+    left: '50%',
+    transform: `translateX(-${shiftPercent}%)`,
+    '--arrow-x': `${shiftPercent}%` // CSS Variable to sync the caret position
+  };
 }
 
-// Which arrow direction to show on the popover
+// Simplified since the horizontal logic is handled by the CSS variable now
 function getPopoverClass(i, cols, rows) {
-  const col = i % cols;
   const row = Math.floor(i / cols);
   const isBottomRow = row >= rows - 2;
-  const isLeftEdge  = col === 0;
-  const isRightEdge = col >= cols - 2;
-
-  let h = 'center';
-  if (isLeftEdge)  h = 'left';
-  if (isRightEdge) h = 'right';
-
-  return `replace-popover arrow-${isBottomRow ? 'bottom' : 'top'} arrow-h-${h}`;
+  return `replace-popover arrow-${isBottomRow ? 'bottom' : 'top'}`;
 }
 
 export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplace, replaceIndex, searchQuery, searchResults, searching, onSearchInput, onPick, onCloseReplace }) {
@@ -112,7 +103,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
   return (
     <div className="album-grid-wrap">
       <div
-        className="album-grid"
+        className={`album-grid ${replaceIndex !== null ? 'has-active-popover' : ''}`}
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${gap}px`,

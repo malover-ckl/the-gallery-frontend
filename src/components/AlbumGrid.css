@@ -8,6 +8,13 @@
   overflow: visible;
 }
 
+/* Dim the rest of the grid to isolate focus when popover is open */
+.album-grid.has-active-popover .album-cell:not(.replacing) {
+  opacity: 0.4;
+  filter: grayscale(40%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
 /* Cell */
 .album-cell {
   position: relative;
@@ -41,9 +48,11 @@
   z-index: 4;
 }
 
-/* Active replace cell highlight */
+/* Active replace cell highlight - blurs and physically recedes the album */
 .album-cell.replacing img {
-  filter: brightness(0.5);
+  filter: brightness(0.35) blur(4px);
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
 }
 
 /* Empty slot */
@@ -128,53 +137,42 @@
   border-radius: var(--radius);
   box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(200,184,154,0.08);
   z-index: 200;
-  overflow: hidden;
-  animation: popIn 0.12s ease;
+  overflow: visible;
+  animation: popIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes popIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Base Caret Styles */
+.replace-popover::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  /* The magic CSS variable doing the heavy lifting */
+  left: var(--arrow-x, 50%);
+  margin-left: -6px; /* Offset half the width for perfect centering */
+  z-index: -1;
 }
 
 /* Arrow pointing UP (popover opens below cell) */
 .replace-popover.arrow-top::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  width: 10px;
-  height: 10px;
-  background: var(--surface);
+  top: -6px;
   border-left: 1px solid var(--border-warm);
   border-top: 1px solid var(--border-warm);
-  transform: rotate(45deg);
-  z-index: 1;
 }
 
 /* Arrow pointing DOWN (popover opens above cell) */
 .replace-popover.arrow-bottom::before {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  width: 10px;
-  height: 10px;
-  background: var(--surface);
+  bottom: -6px;
   border-right: 1px solid var(--border-warm);
   border-bottom: 1px solid var(--border-warm);
-  transform: rotate(45deg);
-  z-index: 1;
 }
-
-
-/* Horizontal arrow position */
-.arrow-top.arrow-h-center::before,
-.arrow-bottom.arrow-h-center::before { left: 50%; margin-left: -5px; }
-
-.arrow-top.arrow-h-left::before,
-.arrow-bottom.arrow-h-left::before   { left: 16px; }
-
-.arrow-top.arrow-h-right::before,
-.arrow-bottom.arrow-h-right::before  { right: 16px; }
 
 /* Popover contents */
 .popover-search {
