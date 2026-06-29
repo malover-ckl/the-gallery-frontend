@@ -49,11 +49,12 @@
   z-index: 4;
 }
 
-/* Active replace cell highlight - dims and physically recedes the main album cover only (blur removed) */
+/* Active replace cell highlight - Keeps the album bright and popped out */
 .album-cell.replacing > img {
-  filter: brightness(0.35);
-  transform: scale(0.95);
+  filter: brightness(1);
+  transform: scale(1.04);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+  z-index: 2;
 }
 
 /* Empty slot */
@@ -118,12 +119,12 @@
   stroke-linejoin: round;
 }
 
-/* Apply hover transform only to the main cover */
-.album-cell:hover > img {
+/* Apply hover transform ONLY if the cell is not actively being replaced */
+.album-cell:not(.replacing):hover > img {
   transform: scale(1.04);
   filter: brightness(0.82);
 }
-.album-cell:hover .album-overlay { opacity: 1; }
+.album-cell:not(.replacing):hover .album-overlay { opacity: 1; }
 .album-overlay-icon:hover {
   background: rgba(40,40,40,0.92);
   transform: scale(1.12);
