@@ -122,39 +122,69 @@
 /* ── Replace Popover ── */
 .replace-popover {
   position: absolute;
-  top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
   width: 260px;
   background: var(--surface);
   border: 1px solid var(--border-warm);
   border-radius: var(--radius);
   box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(200,184,154,0.08);
-  z-index: 100;
-  animation: popIn 0.15s ease;
+  z-index: 200;
   overflow: hidden;
+  animation: popIn 0.15s ease;
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Little arrow pointing up */
-.replace-popover::before {
+/* Arrow pointing UP (popover opens below cell) */
+.replace-popover.arrow-top::before {
   content: '';
   position: absolute;
   top: -5px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 10px;
   height: 10px;
   background: var(--surface);
   border-left: 1px solid var(--border-warm);
   border-top: 1px solid var(--border-warm);
-  transform: translateX(-50%) rotate(45deg);
+  transform: rotate(45deg);
+  z-index: 1;
 }
 
+/* Arrow pointing DOWN (popover opens above cell) */
+.replace-popover.arrow-bottom::before {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface);
+  border-right: 1px solid var(--border-warm);
+  border-bottom: 1px solid var(--border-warm);
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+/* Flip animation for upward popovers */
+.replace-popover.arrow-bottom {
+  animation: popInUp 0.15s ease;
+}
+@keyframes popInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Horizontal arrow position */
+.arrow-top.arrow-h-center::before,
+.arrow-bottom.arrow-h-center::before { left: 50%; margin-left: -5px; }
+
+.arrow-top.arrow-h-left::before,
+.arrow-bottom.arrow-h-left::before   { left: 16px; }
+
+.arrow-top.arrow-h-right::before,
+.arrow-bottom.arrow-h-right::before  { right: 16px; }
+
+/* Popover contents */
 .popover-search {
   display: flex;
   align-items: center;
@@ -199,7 +229,7 @@
 .popover-status {
   font-size: 11px;
   color: var(--text-dim);
-  padding: 12px 12px;
+  padding: 12px;
   text-align: center;
 }
 

@@ -11,12 +11,55 @@ function ReplaceIcon() {
   );
 }
 
+// Compute popover position so it never clips off any edge
+function getPopoverStyle(i, cols, rows) {
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+
+  // Vertical: bottom 2 rows → open upward
+  const isBottomRow = row >= rows - 2;
+  const vertical = isBottomRow
+    ? { bottom: 'calc(100% + 6px)', top: 'auto' }
+    : { top: 'calc(100% + 6px)',    bottom: 'auto' };
+
+  // Horizontal: figure out how far to shift left/right
+  // Default: centered on the cell (translateX -50%)
+  // Left edge (col 0): anchor to left side of cell
+  // Right edge (last 2 cols): anchor to right side of cell
+  let horizontal = {};
+  if (col === 0) {
+    horizontal = { left: 0, right: 'auto', transform: 'none' };
+  } else if (col >= cols - 2) {
+    horizontal = { right: 0, left: 'auto', transform: 'none' };
+  } else {
+    horizontal = { left: '50%', right: 'auto', transform: 'translateX(-50%)' };
+  }
+
+  // Arrow position hint (passed as data attr via className)
+  return { ...vertical, ...horizontal };
+}
+
+// Which arrow direction to show on the popover
+function getPopoverClass(i, cols, rows) {
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  const isBottomRow = row >= rows - 2;
+  const isLeftEdge  = col === 0;
+  const isRightEdge = col >= cols - 2;
+
+  let h = 'center';
+  if (isLeftEdge)  h = 'left';
+  if (isRightEdge) h = 'right';
+
+  return `replace-popover arrow-${isBottomRow ? 'bottom' : 'top'} arrow-h-${h}`;
+}
+
 export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplace, replaceIndex, searchQuery, searchResults, searching, onSearchInput, onPick, onCloseReplace }) {
-  const total     = cols * rows;
-  const cells     = Array.from({ length: total }, (_, i) => albums[i] || null);
-  const dragIndex = useRef(null);
+  const total      = cols * rows;
+  const cells      = Array.from({ length: total }, (_, i) => albums[i] || null);
+  const dragIndex  = useRef(null);
   const [dragOver, setDragOver] = useState(null);
-  const cellRefs  = useRef([]);
+  const cellRefs   = useRef([]);
   const popoverRef = useRef(null);
 
   const handleDragStart = (e, i) => {
@@ -52,11 +95,13 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
     onReplace(i);
   };
 
-  // Close popover when clicking outside
+  // Close popover on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target) &&
-          cellRefs.current[replaceIndex] && !cellRefs.current[replaceIndex].contains(e.target)) {
+      if (
+        popoverRef.current && !popoverRef.current.contains(e.target) &&
+        cellRefs.current[replaceIndex] && !cellRefs.current[replaceIndex].contains(e.target)
+      ) {
         onCloseReplace();
       }
     };
@@ -104,9 +149,13 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
               </div>
             </div>
 
-            {/* Popover attached below this cell */}
             {replaceIndex === i && (
-              <div className="replace-popover" ref={popoverRef} onClick={e => e.stopPropagation()}>
+              <div
+                className={getPopoverClass(i, cols, rows)}
+                style={getPopoverStyle(i, cols, rows)}
+                ref={popoverRef}
+                onClick={e => e.stopPropagation()}
+              >
                 <div className="popover-search">
                   <input
                     autoFocus
@@ -119,15 +168,9 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
                   <button className="popover-close" onClick={onCloseReplace}>✕</button>
                 </div>
                 <div className="popover-results">
-                  {searching && (
-                    <div className="popover-status">Searching...</div>
-                  )}
-                  {!searching && !searchQuery && (
-                    <div className="popover-status">Start typing to search Spotify</div>
-                  )}
-                  {!searching && searchQuery && searchResults.length === 0 && (
-                    <div className="popover-status">No results found</div>
-                  )}
+                  {searching && <div className="popover-status">Searching...</div>}
+                  {!searching && !searchQuery && <div className="popover-status">Start typing to search Spotify</div>}
+                  {!searching && searchQuery && searchResults.length === 0 && <div className="popover-status">No results found</div>}
                   {!searching && searchResults.map((album, j) => (
                     <div key={j} className="popover-result" onClick={() => onPick(album)}>
                       <img src={album.url} alt={album.name} />
