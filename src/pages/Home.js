@@ -4,12 +4,12 @@ import './Home.css';
 const API = process.env.REACT_APP_API_URL || '';
 
 const MOSAIC_COLORS = [
-  '#1DB954','#121212','#1ed760','#2d0a3d','#0d3d1a',
-  '#ff6eb4','#121212','#1DB954','#1a3d0d','#3d0d2d',
-  '#121212','#1ed760','#0a1a0d','#ff6eb4','#1DB954',
-  '#1a0d3d','#0d3d1a','#121212','#ff4da6','#1DB954',
-  '#2d1a00','#1ed760','#121212','#3d0a1a','#0d2d0d',
-  '#ff6eb4','#1DB954','#121212','#1a3d2d','#ff4da6',
+  '#1da24b', '#395faf', '#9da9df', '#2f4858', '#ff4856',
+'#00a970', '#009c78', '#ef6c9f', '#395faf', '#a93b4e',
+'#e9c46a', '#ffd166', '#f4a261', '#eaac8b', '#ffb5a7', 
+'#d90429', '#9a031e', '#b56576', '#6d597a', '#355070', 
+'#1d3557', '#073b4c', '#264653', '#457b9d', '#118ab2', 
+'#a8dadc', '#2a9d8f', '#06d6a0', '#f8edeb', '#c5c3c6'
 ];
 
 export default function Home() {
