@@ -58,7 +58,16 @@
   color: var(--accent);
 }
 
-/* Apply button */
+/* Saved confirmation note (replaces old Apply button feedback) */
+.pref-saved-note {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.03em;
+  margin: 0.25rem 0 0;
+  text-align: center;
+}
+
+/* Apply button (legacy, no longer rendered but kept in case it's reused) */
 .btn-save {
   width: 100%;
   margin-top: 0.25rem;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
@@ -33,17 +33,11 @@ const INTERVALS = [
 ];
 
 export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, colorBalancing, isCustom }) {
-  const [local, setLocal] = useState({ ...prefs });
-
-  const set = (key, val) => setLocal(p => ({ ...p, [key]: val }));
-
-  const handleGridChange = (cols, rows) => {
-    setLocal(p => ({ ...p, grid_cols: cols, grid_rows: rows }));
-  };
-
-  const handleResChange = (w, h) => {
-    setLocal(p => ({ ...p, canvas_w: w, canvas_h: h }));
-  };
+  // Every pill click now saves immediately instead of staging changes
+  // locally and waiting for an "Apply" button. `prefs` is the live source
+  // of truth from Dashboard; we just merge in the one changed field and
+  // hand the whole object back to onSave.
+  const update = (changes) => onSave({ ...prefs, ...changes });
 
   return (
     <div className="pref-panel">
@@ -54,8 +48,8 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
         <div className="pill-group">
           {TIME_RANGES.map(t => (
             <button key={t.value}
-              className={`pill ${local.time_range === t.value ? 'active' : ''}`}
-              onClick={() => set('time_range', t.value)}>
+              className={`pill ${prefs.time_range === t.value ? 'active' : ''}`}
+              onClick={() => update({ time_range: t.value })}>
               {t.label}
             </button>
           ))}
@@ -67,8 +61,8 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
         <div className="pill-group">
           {GRIDS.map(g => (
             <button key={g.label}
-              className={`pill ${local.grid_cols === g.cols && local.grid_rows === g.rows ? 'active' : ''}`}
-              onClick={() => handleGridChange(g.cols, g.rows)}>
+              className={`pill ${prefs.grid_cols === g.cols && prefs.grid_rows === g.rows ? 'active' : ''}`}
+              onClick={() => update({ grid_cols: g.cols, grid_rows: g.rows })}>
               {g.label}
             </button>
           ))}
@@ -80,8 +74,8 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
         <div className="pill-group">
           {RESOLUTIONS.map(r => (
             <button key={r.label}
-              className={`pill ${local.canvas_w === r.w && local.canvas_h === r.h ? 'active' : ''}`}
-              onClick={() => handleResChange(r.w, r.h)}>
+              className={`pill ${prefs.canvas_w === r.w && prefs.canvas_h === r.h ? 'active' : ''}`}
+              onClick={() => update({ canvas_w: r.w, canvas_h: r.h })}>
               {r.label}
             </button>
           ))}
@@ -93,8 +87,8 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
         <div className="pill-group">
           {GAPS.map(g => (
             <button key={g.value}
-              className={`pill ${local.gap_px === g.value ? 'active' : ''}`}
-              onClick={() => set('gap_px', g.value)}>
+              className={`pill ${prefs.gap_px === g.value ? 'active' : ''}`}
+              onClick={() => update({ gap_px: g.value })}>
               {g.label}
             </button>
           ))}
@@ -106,17 +100,15 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
         <div className="pill-group">
           {INTERVALS.map(i => (
             <button key={i.value}
-              className={`pill ${local.refresh_hrs === i.value ? 'active' : ''}`}
-              onClick={() => set('refresh_hrs', i.value)}>
+              className={`pill ${prefs.refresh_hrs === i.value ? 'active' : ''}`}
+              onClick={() => update({ refresh_hrs: i.value })}>
               {i.label}
             </button>
           ))}
         </div>
       </div>
 
-      <button className="btn-save" onClick={() => onSave(local)}>
-        {saved ? '✓ Saved' : 'Apply & preview'}
-      </button>
+      {saved && <p className="pref-saved-note">✓ Saved</p>}
 
       {/* Layout buttons in sidebar */}
       <div className="pref-group" style={{ marginTop: '0.5rem' }}>
