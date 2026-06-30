@@ -25,8 +25,8 @@ export default function Home() {
         <div className="hero-text">
           <p className="hero-eyebrow">Your taste, on display.</p>
           <h1 className="hero-headline">
-            Your Favorite<br />
-	    <em>albums,</em><br />
+            Your <em>Favorite,</em><br />
+	    albums,<br />
             front and center
           </h1>
           <p className="hero-body">
@@ -40,6 +40,7 @@ export default function Home() {
             Connect with Spotify
           </a>
           <p className="hero-fine">Free. No credit card. Read-only Spotify access.</p>
+<p className="hero-fine">(Trust me I couldn't steal your data if I tried)</p>
         </div>
 
         <div className="hero-visual">
