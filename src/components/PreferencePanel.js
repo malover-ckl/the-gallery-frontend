@@ -39,6 +39,49 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
   // hand the whole object back to onSave.
   const update = (changes) => onSave({ ...prefs, ...changes });
 
+  const handleDetectScreen = () => {
+    // window.screen gives the physical display's pixel dimensions; multiply
+    // by devicePixelRatio so a HiDPI/Retina screen (e.g. reported as 1440
+    // logical px but physically 2880) maps to the right preset instead of
+    // picking something far too small.
+    const dpr = window.devicePixelRatio || 1;
+    const screenW = Math.round((window.screen.width || 1920) * dpr);
+    const screenH = Math.round((window.screen.height || 1080) * dpr);
+    const screenRatio = screenW / screenH;
+
+    // Find the resolution preset with the closest aspect ratio to the
+    // actual screen (closest match wins; exact pixel match isn't required
+    // since presets are fixed options, not arbitrary).
+    let bestRes = RESOLUTIONS[0];
+    let bestResDiff = Infinity;
+    for (const r of RESOLUTIONS) {
+      const diff = Math.abs(r.w / r.h - screenRatio);
+      if (diff < bestResDiff) {
+        bestResDiff = diff;
+        bestRes = r;
+      }
+    }
+
+    // Find the grid preset whose column/row ratio best matches the same
+    // screen ratio, so individual tiles aren't badly stretched.
+    let bestGrid = GRIDS[0];
+    let bestGridDiff = Infinity;
+    for (const g of GRIDS) {
+      const diff = Math.abs(g.cols / g.rows - screenRatio);
+      if (diff < bestGridDiff) {
+        bestGridDiff = diff;
+        bestGrid = g;
+      }
+    }
+
+    update({
+      canvas_w: bestRes.w,
+      canvas_h: bestRes.h,
+      grid_cols: bestGrid.cols,
+      grid_rows: bestGrid.rows,
+    });
+  };
+
   return (
     <div className="pref-panel">
       <h3 className="pref-title">Settings</h3>
@@ -71,6 +114,14 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
 
       <div className="pref-group">
         <label className="pref-label">Resolution</label>
+        <button className="btn-detect-screen" onClick={handleDetectScreen}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+          Auto-detect my screen
+        </button>
         <div className="pill-group">
           {RESOLUTIONS.map(r => (
             <button key={r.label}
