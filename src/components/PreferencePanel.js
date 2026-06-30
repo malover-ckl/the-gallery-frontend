@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
@@ -35,37 +35,42 @@ const INTERVALS = [
 export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCustom }) {
   const [local, setLocal] = useState({ ...prefs });
 
-  const set = (key, val) => setLocal(p => ({ ...p, [key]: val }));
+  // Keep local state perfectly in sync if dashboard updates it
+  useEffect(() => {
+    setLocal({ ...prefs });
+  }, [prefs]);
+
+  // Instantly update the local UI and trigger the save/refresh
+  const updateAndSave = (newPrefs) => {
+    setLocal(newPrefs);
+    onSave(newPrefs);
+  };
+
+  const set = (key, val) => updateAndSave({ ...local, [key]: val });
 
   const handleGridChange = (cols, rows) => {
-    setLocal(p => ({ ...p, grid_cols: cols, grid_rows: rows }));
+    updateAndSave({ ...local, grid_cols: cols, grid_rows: rows });
   };
 
   const handleResChange = (w, h) => {
-    setLocal(p => ({ ...p, canvas_w: w, canvas_h: h }));
+    updateAndSave({ ...local, canvas_w: w, canvas_h: h });
   };
 
-  // --- NEW MAGIC LAYOUT FUNCTION ---
   const autoDetectLayout = () => {
-    // 1. Grab actual monitor dimensions directly from the browser
     const screenW = window.screen.width;
     const screenH = window.screen.height;
-    
-    // 2. Use 192px as our "golden ratio" target tile size to prevent distortion
     const targetTileSize = 192;
     
-    // 3. Calculate how many tiles perfectly fit 
     const bestCols = Math.floor(screenW / targetTileSize);
     const bestRows = Math.floor(screenH / targetTileSize);
 
-    // 4. Update the settings state instantly
-    setLocal(p => ({ 
-      ...p, 
+    updateAndSave({ 
+      ...local, 
       canvas_w: screenW, 
       canvas_h: screenH,
       grid_cols: bestCols,
       grid_rows: bestRows
-    }));
+    });
   };
 
   return (
@@ -85,7 +90,6 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
         </div>
       </div>
       
-      {/* Auto-detect button added right above grid settings */}
       <div className="pref-group" style={{ marginBottom: '1.25rem' }}>
         <button 
           onClick={autoDetectLayout} 
@@ -166,10 +170,6 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
           ))}
         </div>
       </div>
-
-      <button className="btn-save" onClick={() => onSave(local)}>
-        {saved ? '✓ Saved' : 'Apply & preview'}
-      </button>
 
       {/* Shuffle button in sidebar */}
       <div className="pref-group" style={{ marginTop: '0.5rem' }}>
