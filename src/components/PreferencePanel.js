@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
@@ -13,6 +13,13 @@ const GRIDS = [
   { cols: 12, rows: 6, label: '12 × 6  (72 albums)' },
 ];
 
+const RESOLUTIONS = [
+  { w: 1920, h: 1080,  label: '1920 × 1080' },
+  { w: 1920, h: 1200,  label: '1920 × 1200' },
+  { w: 2560, h: 1440,  label: '2560 × 1440' },
+  { w: 3840, h: 2160,  label: '3840 × 2160' },
+];
+
 const GAPS = [
   { value: 0,  label: 'None' },
   { value: 3,  label: 'Tiny' },
@@ -25,41 +32,17 @@ const INTERVALS = [
   { value: 24, label: 'Daily' },
 ];
 
-export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCustom }) {
+export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, isCustom }) {
   const [local, setLocal] = useState({ ...prefs });
 
-  // Keep local state perfectly in sync if dashboard updates it
-  useEffect(() => {
-    setLocal({ ...prefs });
-  }, [prefs]);
-
-  // Instantly update the local UI and trigger the save/refresh
-  const updateAndSave = (newPrefs) => {
-    setLocal(newPrefs);
-    onSave(newPrefs);
-  };
-
-  const set = (key, val) => updateAndSave({ ...local, [key]: val });
+  const set = (key, val) => setLocal(p => ({ ...p, [key]: val }));
 
   const handleGridChange = (cols, rows) => {
-    updateAndSave({ ...local, grid_cols: cols, grid_rows: rows });
+    setLocal(p => ({ ...p, grid_cols: cols, grid_rows: rows }));
   };
 
-  const autoDetectLayout = () => {
-    const screenW = window.screen.width;
-    const screenH = window.screen.height;
-    const targetTileSize = 192;
-    
-    const bestCols = Math.floor(screenW / targetTileSize);
-    const bestRows = Math.floor(screenH / targetTileSize);
-
-    updateAndSave({ 
-      ...local, 
-      canvas_w: screenW, 
-      canvas_h: screenH,
-      grid_cols: bestCols,
-      grid_rows: bestRows
-    });
+  const handleResChange = (w, h) => {
+    setLocal(p => ({ ...p, canvas_w: w, canvas_h: h }));
   };
 
   return (
@@ -78,41 +61,28 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
           ))}
         </div>
       </div>
-      
-      <div className="pref-group">
-        <label className="pref-label">Grid size 
-          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
-            {local.grid_cols} × {local.grid_rows}
-          </span>
-        </label>
-        
-        {/* Auto-detect button moved inside the Grid size section */}
-        <button 
-          onClick={autoDetectLayout} 
-          style={{
-            width: '100%',
-            background: 'var(--surface-2)',
-            color: 'var(--text)',
-            border: '1px solid var(--border-warm)',
-            padding: '8px 12px',
-            borderRadius: 'var(--radius)',
-            cursor: 'pointer',
-            fontSize: '12px',
-            transition: 'background 0.2s',
-            marginBottom: '0.75rem' // Space between button and pills
-          }}
-          onMouseOver={(e) => e.target.style.background = 'var(--surface-3)'}
-          onMouseOut={(e) => e.target.style.background = 'var(--surface-2)'}
-        >
-          ✨ Auto-detect optimal layout
-        </button>
 
+      <div className="pref-group">
+        <label className="pref-label">Grid size</label>
         <div className="pill-group">
           {GRIDS.map(g => (
             <button key={g.label}
               className={`pill ${local.grid_cols === g.cols && local.grid_rows === g.rows ? 'active' : ''}`}
               onClick={() => handleGridChange(g.cols, g.rows)}>
               {g.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="pref-group">
+        <label className="pref-label">Resolution</label>
+        <div className="pill-group">
+          {RESOLUTIONS.map(r => (
+            <button key={r.label}
+              className={`pill ${local.canvas_w === r.w && local.canvas_h === r.h ? 'active' : ''}`}
+              onClick={() => handleResChange(r.w, r.h)}>
+              {r.label}
             </button>
           ))}
         </div>
@@ -144,46 +114,34 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
         </div>
       </div>
 
-      {/* Shuffle button in sidebar */}
+      <button className="btn-save" onClick={() => onSave(local)}>
+        {saved ? '✓ Saved' : 'Apply & preview'}
+      </button>
+
+      {/* Layout buttons in sidebar */}
       <div className="pref-group" style={{ marginTop: '0.5rem' }}>
         <label className="pref-label">Layout</label>
-        <button className="btn-shuffle-sidebar" onClick={onShuffle}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="16 3 21 3 21 8"/>
-            <line x1="4" y1="20" x2="21" y2="3"/>
-            <polyline points="21 16 21 21 16 21"/>
-            <line x1="15" y1="15" x2="21" y2="21"/>
-          </svg>
-          Shuffle order
-        </button>
+        
+        <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+          <button className="btn-shuffle-sidebar" onClick={onShuffle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+              <polyline points="16 3 21 3 21 8"/>
+              <line x1="4" y1="20" x2="21" y2="3"/>
+              <polyline points="21 16 21 21 16 21"/>
+              <line x1="15" y1="15" x2="21" y2="21"/>
+            </svg>
+            Shuffle order
+          </button>
+
+          <button 
+            className="btn-shuffle-sidebar" 
+            onClick={onColorBalance}
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border-warm)' }}
+          >
+            🎨 Balance colors
+          </button>
+        </div>
       </div>
-const handleColorBalance = async () => {
-    // 1. Show a loading state if you have one, because this takes a few seconds!
-    setIsLoading(true); 
-
-    try {
-      // 2. Call your new Python endpoint, sending the current albums
-      const response = await fetch(`${API_URL}/api/layout/color-balance/${userId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ albums: albums }) // Send current albums to be sorted
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // 3. Update the grid with the beautifully sorted albums
-        setAlbums(data.albums);
-        setIsCustom(true); // Mark it as a custom layout so it doesn't get overwritten
-      } else {
-        console.error("Failed to balance colors");
-      }
-    } catch (error) {
-      console.error("Error balancing colors:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
     </div>
   );
 }
