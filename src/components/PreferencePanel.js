@@ -32,7 +32,7 @@ const INTERVALS = [
   { value: 24, label: 'Daily' },
 ];
 
-export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, isCustom }) {
+export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, colorBalancing, isCustom }) {
   const [local, setLocal] = useState({ ...prefs });
 
   const set = (key, val) => setLocal(p => ({ ...p, [key]: val }));
@@ -136,9 +136,10 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
           <button 
             className="btn-shuffle-sidebar" 
             onClick={onColorBalance}
-            style={{ background: 'var(--surface-2)', border: '1px solid var(--border-warm)' }}
+            disabled={colorBalancing}
+            style={{ background: 'var(--surface-2)', border: '1px solid var(--border-warm)', opacity: colorBalancing ? 0.6 : 1, cursor: colorBalancing ? 'default' : 'pointer' }}
           >
-            🎨 Balance colors
+            🎨 {colorBalancing ? 'Balancing...' : 'Balance colors'}
           </button>
         </div>
       </div>
