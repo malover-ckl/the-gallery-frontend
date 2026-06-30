@@ -58,31 +58,6 @@
   color: var(--accent);
 }
 
-/* Auto-detect screen button */
-.btn-detect-screen {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid var(--border-warm);
-  border-radius: var(--radius);
-  padding: 7px 11px;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-  margin-bottom: 0.6rem;
-}
-.btn-detect-screen:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-.btn-detect-screen svg { flex-shrink: 0; opacity: 0.6; transition: opacity 0.15s; }
-.btn-detect-screen:hover svg { opacity: 1; }
-
 /* Saved confirmation note (replaces old Apply button feedback) */
 .pref-saved-note {
   font-size: 11px;

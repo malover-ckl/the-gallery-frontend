@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [layoutSaved, setLayoutSaved] = useState(false);
   const [balancing, setBalancing]     = useState(false);
   const prefsRef = useRef(null);
+  const savePrefsRef = useRef(null);
 
   // Replace popover state
   const [replaceIndex, setReplaceIndex]     = useState(null);
@@ -29,11 +30,36 @@ export default function Dashboard() {
   const [searching, setSearching]           = useState(false);
   const searchTimeout = useRef(null);
 
+  // Reads the actual screen's pixel dimensions (accounting for HiDPI/Retina
+  // displays via devicePixelRatio) so the downloaded wallpaper file matches
+  // the screen it'll actually be displayed on, with no manual picker needed.
+  const detectScreenResolution = () => {
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.round((window.screen.width || 1920) * dpr);
+    const h = Math.round((window.screen.height || 1080) * dpr);
+    return { w, h };
+  };
+
   useEffect(() => {
     if (!userId) return;
     fetch(`${API}/auth/user/${userId}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(data => { setUser(data); setPrefs(data.preferences); });
+      .then(data => {
+        setUser(data);
+        const fetchedPrefs = data.preferences;
+        const { w, h } = detectScreenResolution();
+
+        // Only auto-update resolution if it differs from what's saved —
+        // avoids an unnecessary extra save/reload on every single visit.
+        // savePrefsRef is used (rather than calling savePrefs directly)
+        // because savePrefs is defined further down and depends on userId,
+        // which is already in scope here via closure — see ref note below.
+        if (fetchedPrefs.canvas_w !== w || fetchedPrefs.canvas_h !== h) {
+          savePrefsRef.current({ ...fetchedPrefs, canvas_w: w, canvas_h: h });
+        } else {
+          setPrefs(fetchedPrefs);
+        }
+      });
   }, [userId]);
 
   const loadPreview = useCallback(() => {
@@ -85,6 +111,7 @@ export default function Dashboard() {
     setTimeout(() => setSaved(false), 2000);
     loadPreview();
   };
+  savePrefsRef.current = savePrefs;
 
   const saveLayout = async (newAlbums) => {
     await fetch(`${API}/api/layout/${userId}`, {
