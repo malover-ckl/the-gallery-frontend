@@ -25,8 +25,8 @@ export default function Home() {
         <div className="hero-text">
           <p className="hero-eyebrow">Your taste, on display.</p>
           <h1 className="hero-headline">
-            Your most<br />
-	    <em>played albums,</em><br />
+            Your Favorite<br />
+	    <em>albums,</em><br />
             front and center
           </h1>
           <p className="hero-body">
