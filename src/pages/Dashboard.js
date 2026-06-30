@@ -249,9 +249,14 @@ export default function Dashboard() {
                 </button>
               )}
               {layoutSaved && <span className="layout-saved">Layout saved ✓</span>}
-              <button className="btn-download" onClick={downloadWallpaper}>
-                Download wallpaper
-              </button>
+              <div className="download-group">
+                <button className="btn-download" onClick={downloadWallpaper}>
+                  Download wallpaper (one-time)
+                </button>
+                <p className="download-hint">
+                  ← For automatic, ongoing updates, use the companion app in the sidebar
+                </p>
+              </div>
             </div>
           </div>
 
