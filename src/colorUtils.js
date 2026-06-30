@@ -76,8 +76,14 @@ function rgbToHsl(r, g, b) {
 
 /**
  * Given an array of album objects (each with a `url`), resolves to a
- * new array sorted by hue, then lightness, so similar colors cluster
- * together across the grid (like a gradient sweep).
+ * new array where similar colors are spread apart from each other,
+ * rather than clumped together — useful so the grid reads as an even
+ * mix of color rather than bands/clusters of one hue.
+ *
+ * Approach: bucket albums into hue groups (e.g. red, orange, yellow...),
+ * sort within each bucket by lightness for a bit of internal consistency,
+ * then "deal" one album at a time from each bucket in rotation so the
+ * final order alternates between hue groups instead of grouping them.
  */
 export async function sortAlbumsByColor(albums) {
   const colors = await Promise.all(
@@ -90,14 +96,45 @@ export async function sortAlbumsByColor(albums) {
     return { album, hsl: rgbToHsl(r, g, b) };
   });
 
-  // Keep empty slots (null albums) at the end, sort the rest by hue then lightness
   const withAlbum = withColor.filter((x) => x.album && x.hsl);
   const withoutAlbum = withColor.filter((x) => !x.album || !x.hsl);
 
-  withAlbum.sort((a, b) => {
-    if (Math.abs(a.hsl.h - b.hsl.h) > 1) return a.hsl.h - b.hsl.h;
-    return a.hsl.l - b.hsl.l;
+  // Bucket into hue groups (12 buckets = 30deg slices around the color wheel).
+  // Low-saturation (greys/blacks/whites) get their own bucket so they don't
+  // skew into an arbitrary hue bucket just from noise.
+  const BUCKET_COUNT = 12;
+  const buckets = Array.from({ length: BUCKET_COUNT + 1 }, () => []);
+
+  withAlbum.forEach((item) => {
+    if (item.hsl.s < 0.12) {
+      buckets[BUCKET_COUNT].push(item); // neutral/greyscale bucket
+    } else {
+      const bucketIndex = Math.floor(item.hsl.h / (360 / BUCKET_COUNT)) % BUCKET_COUNT;
+      buckets[bucketIndex].push(item);
+    }
   });
 
-  return [...withAlbum, ...withoutAlbum].map((x) => x.album);
+  // Sort within each bucket by lightness for a touch of internal order
+  buckets.forEach((bucket) => bucket.sort((a, b) => a.hsl.l - b.hsl.l));
+
+  // Shuffle bucket order each run so the same hue doesn't always start first
+  const bucketOrder = buckets
+    .map((bucket, i) => i)
+    .filter((i) => buckets[i].length > 0)
+    .sort(() => Math.random() - 0.5);
+
+  // Round-robin deal: take one from each non-empty bucket in turn
+  const dispersed = [];
+  let remaining = withAlbum.length;
+  while (remaining > 0) {
+    for (const bucketIndex of bucketOrder) {
+      const bucket = buckets[bucketIndex];
+      if (bucket.length > 0) {
+        dispersed.push(bucket.shift());
+        remaining--;
+      }
+    }
+  }
+
+  return [...dispersed, ...withoutAlbum].map((x) => x.album);
 }
