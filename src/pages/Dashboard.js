@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import PreferencePanel from '../components/PreferencePanel';
 import AlbumGrid from '../components/AlbumGrid';
 import CompanionDownload from '../components/CompanionDownload';
+import { sortAlbumsByColor } from '../colorUtils';
 import './Dashboard.css';
 
 const API = process.env.REACT_APP_API_URL || '';
@@ -18,8 +19,8 @@ export default function Dashboard() {
   const [saved, setSaved]             = useState(false);
   const [isCustom, setIsCustom]       = useState(false);
   const [layoutSaved, setLayoutSaved] = useState(false);
+  const [balancing, setBalancing]     = useState(false);
 
-  // Replace popover state
   const [replaceIndex, setReplaceIndex]     = useState(null);
   const [searchQuery, setSearchQuery]       = useState('');
   const [searchResults, setSearchResults]   = useState([]);
@@ -96,6 +97,17 @@ export default function Dashboard() {
     handleReorder(shuffled);
   };
 
+  const handleColorBalance = async () => {
+    if (balancing || albums.length === 0) return;
+    setBalancing(true);
+    try {
+      const sorted = await sortAlbumsByColor(albums);
+      handleReorder(sorted);
+    } finally {
+      setBalancing(false);
+    }
+  };
+
   const handleReplace = (index) => {
     setReplaceIndex(index === replaceIndex ? null : index);
     setSearchQuery('');
@@ -155,18 +167,18 @@ export default function Dashboard() {
       </nav>
 
       <div className="dash-body">
-        {/* SIDEBAR */}
         <div className="dash-sidebar">
-          
-          <PreferencePanel 
-            prefs={prefs} 
+
+          <PreferencePanel
+            prefs={prefs}
             onSave={savePrefs}
-            saved={saved} 
+            saved={saved}
             onShuffle={handleShuffle}
-            onColorBalance={handleColorBalance} // <-- The new prop!
-            isCustom={isCustom} 
+            onColorBalance={handleColorBalance}
+            colorBalancing={balancing}
+            isCustom={isCustom}
           />
-          
+
           <CompanionDownload userId={userId} />
         </div>
 
