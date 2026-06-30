@@ -45,6 +45,29 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
     setLocal(p => ({ ...p, canvas_w: w, canvas_h: h }));
   };
 
+  // --- NEW MAGIC LAYOUT FUNCTION ---
+  const autoDetectLayout = () => {
+    // 1. Grab actual monitor dimensions directly from the browser
+    const screenW = window.screen.width;
+    const screenH = window.screen.height;
+    
+    // 2. Use 192px as our "golden ratio" target tile size to prevent distortion
+    const targetTileSize = 192;
+    
+    // 3. Calculate how many tiles perfectly fit 
+    const bestCols = Math.floor(screenW / targetTileSize);
+    const bestRows = Math.floor(screenH / targetTileSize);
+
+    // 4. Update the settings state instantly
+    setLocal(p => ({ 
+      ...p, 
+      canvas_w: screenW, 
+      canvas_h: screenH,
+      grid_cols: bestCols,
+      grid_rows: bestRows
+    }));
+  };
+
   return (
     <div className="pref-panel">
       <h3 className="pref-title">Settings</h3>
@@ -61,9 +84,35 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
           ))}
         </div>
       </div>
+      
+      {/* Auto-detect button added right above grid settings */}
+      <div className="pref-group" style={{ marginBottom: '1.25rem' }}>
+        <button 
+          onClick={autoDetectLayout} 
+          style={{
+            width: '100%',
+            background: 'var(--surface-2)',
+            color: 'var(--text)',
+            border: '1px solid var(--border-warm)',
+            padding: '8px 12px',
+            borderRadius: 'var(--radius)',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'background 0.2s'
+          }}
+          onMouseOver={(e) => e.target.style.background = 'var(--surface-3)'}
+          onMouseOut={(e) => e.target.style.background = 'var(--surface-2)'}
+        >
+          ✨ Auto-detect optimal layout
+        </button>
+      </div>
 
       <div className="pref-group">
-        <label className="pref-label">Grid size</label>
+        <label className="pref-label">Grid size 
+          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
+            {local.grid_cols} × {local.grid_rows}
+          </span>
+        </label>
         <div className="pill-group">
           {GRIDS.map(g => (
             <button key={g.label}
@@ -76,7 +125,11 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
       </div>
 
       <div className="pref-group">
-        <label className="pref-label">Resolution</label>
+        <label className="pref-label">Resolution
+          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
+            {local.canvas_w} × {local.canvas_h}
+          </span>
+        </label>
         <div className="pill-group">
           {RESOLUTIONS.map(r => (
             <button key={r.label}
