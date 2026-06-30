@@ -157,6 +157,33 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
           Shuffle order
         </button>
       </div>
+const handleColorBalance = async () => {
+    // 1. Show a loading state if you have one, because this takes a few seconds!
+    setIsLoading(true); 
+
+    try {
+      // 2. Call your new Python endpoint, sending the current albums
+      const response = await fetch(`${API_URL}/api/layout/color-balance/${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ albums: albums }) // Send current albums to be sorted
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // 3. Update the grid with the beautifully sorted albums
+        setAlbums(data.albums);
+        setIsCustom(true); // Mark it as a custom layout so it doesn't get overwritten
+      } else {
+        console.error("Failed to balance colors");
+      }
+    } catch (error) {
+      console.error("Error balancing colors:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
     </div>
   );
 }

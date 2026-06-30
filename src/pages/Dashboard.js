@@ -155,10 +155,20 @@ export default function Dashboard() {
       </nav>
 
       <div className="dash-body">
-        <aside className="dash-sidebar">
-          <PreferencePanel prefs={prefs} onSave={savePrefs} saved={saved} onShuffle={handleShuffle} />
-          <CompanionDownload userId={userId} apiUrl={API} />
-        </aside>
+        {/* SIDEBAR */}
+        <div className="dash-sidebar">
+          
+          <PreferencePanel 
+            prefs={prefs} 
+            onSave={savePrefs}
+            saved={saved} 
+            onShuffle={handleShuffle}
+            onColorBalance={handleColorBalance} // <-- The new prop!
+            isCustom={isCustom} 
+          />
+          
+          <CompanionDownload userId={userId} />
+        </div>
 
         <main className="dash-main">
           <div className="dash-main-header">
