@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [isCustom, setIsCustom]       = useState(false);
   const [layoutSaved, setLayoutSaved] = useState(false);
   const [balancing, setBalancing]     = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const prefsRef = useRef(null);
   const savePrefsRef = useRef(null);
 
@@ -38,6 +39,17 @@ export default function Dashboard() {
     const w = Math.round((window.screen.width || 1920) * dpr);
     const h = Math.round((window.screen.height || 1080) * dpr);
     return { w, h };
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+    const dismissed = window.localStorage.getItem('gallery_onboarding_dismissed');
+    if (!dismissed) setShowOnboarding(true);
+  }, [userId]);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    window.localStorage.setItem('gallery_onboarding_dismissed', 'true');
   };
 
   useEffect(() => {
@@ -243,22 +255,33 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="dash-main-actions">
-              {isCustom && (
-                <button className="btn-reset" onClick={resetLayout}>
-                  Reset to Spotify order
-                </button>
+              <button className="btn-download" onClick={downloadWallpaper}>
+                Download wallpaper
+              </button>
+              {(isCustom || layoutSaved) && (
+                <div className="dash-secondary-actions">
+                  {layoutSaved && <span className="layout-saved">Layout saved ✓</span>}
+                  {isCustom && (
+                    <button className="btn-reset" onClick={resetLayout}>
+                      Reset to Spotify order
+                    </button>
+                  )}
+                </div>
               )}
-              {layoutSaved && <span className="layout-saved">Layout saved ✓</span>}
-              <div className="download-group">
-                <button className="btn-download" onClick={downloadWallpaper}>
-                  Download wallpaper (one-time)
-                </button>
-                <p className="download-hint">
-                  ← For automatic, ongoing updates, use the companion app in the sidebar
-                </p>
-              </div>
             </div>
           </div>
+
+          {showOnboarding && (
+            <div className="onboarding-banner">
+              <p>
+                <strong>Tip:</strong> drag any cover to reorder it, or hover and click the
+                ↻ icon to swap it for a different album.
+              </p>
+              <button className="onboarding-dismiss" onClick={dismissOnboarding}>
+                Got it
+              </button>
+            </div>
+          )}
 
           {loading
             ? <div className="preview-loading"><div className="spinner" />Building preview...</div>

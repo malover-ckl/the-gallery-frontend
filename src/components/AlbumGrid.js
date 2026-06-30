@@ -183,7 +183,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
       </div>
       <div className="grid-footer">
         <p className="grid-note">
-          {albums.length} of {total} slots · drag to reorder · click icon to replace
+          {albums.length} of {total} albums
         </p>
       </div>
     </div>

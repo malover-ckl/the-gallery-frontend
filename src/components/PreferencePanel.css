@@ -10,7 +10,15 @@
 }
 
 .pref-group {
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Extra top spacing before Layout section to visually separate it
+   from the settings above — layout is a different category of action */
+.pref-group--layout {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
 }
 
 /* Section label — like a record store bin divider */

@@ -93,7 +93,7 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
       {saved && <p className="pref-saved-note">✓ Saved</p>}
 
       {/* Layout buttons in sidebar */}
-      <div className="pref-group" style={{ marginTop: '0.5rem' }}>
+      <div className="pref-group pref-group--layout">
         <label className="pref-label">Layout</label>
         
         <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
