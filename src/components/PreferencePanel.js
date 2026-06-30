@@ -2,9 +2,9 @@ import React from 'react';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
-  { value: 'short_term',  label: 'Last 4 weeks' },
-  { value: 'medium_term', label: 'Last 6 months' },
-  { value: 'long_term',   label: 'All time' },
+  { value: 'short_term',  label: 'Recent (~4 weeks)' },
+  { value: 'medium_term', label: 'Recent months (~6 months)' },
+  { value: 'long_term',   label: 'All-time favorites' },
 ];
 
 const GRIDS = [
@@ -20,9 +20,11 @@ const GAPS = [
 ];
 
 const INTERVALS = [
-  { value: 1,  label: 'Every hour' },
-  { value: 6,  label: 'Every 6 hours' },
-  { value: 24, label: 'Daily' },
+  { value: 168,  label: 'Weekly' },
+  { value: 730,  label: 'Monthly' },
+  { value: 2190, label: 'Every 3 months' },
+  { value: 4380, label: 'Every 6 months' },
+  { value: 8760, label: 'Yearly' },
 ];
 
 export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, colorBalancing, isCustom }) {
