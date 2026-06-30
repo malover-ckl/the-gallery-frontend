@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [layoutSaved, setLayoutSaved] = useState(false);
   const [balancing, setBalancing]     = useState(false);
 
+  // Replace popover state
   const [replaceIndex, setReplaceIndex]     = useState(null);
   const [searchQuery, setSearchQuery]       = useState('');
   const [searchResults, setSearchResults]   = useState([]);
@@ -101,7 +102,7 @@ export default function Dashboard() {
     if (balancing || albums.length === 0) return;
     setBalancing(true);
     try {
-      const sorted = await sortAlbumsByColor(albums);
+      const sorted = await sortAlbumsByColor(albums, prefs.grid_cols);
       handleReorder(sorted);
     } finally {
       setBalancing(false);
@@ -167,6 +168,7 @@ export default function Dashboard() {
       </nav>
 
       <div className="dash-body">
+        {/* SIDEBAR */}
         <div className="dash-sidebar">
 
           <PreferencePanel
