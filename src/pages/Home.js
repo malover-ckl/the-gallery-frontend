@@ -40,7 +40,7 @@ export default function Home() {
             Connect with Spotify
           </a>
           <p className="hero-fine">Free. No credit card. Read-only Spotify access.</p>
-<p className="hero-fine"> style={{ fontSize: '10px', lineHeight: '1.3' }}>(Trust me I couldn't steal your data if I tried)</p>
+<p className="hero-fine" style={{ fontSize: '10px', lineHeight: '1.3' }}>(Trust me I couldn't steal your data if I tried)</p>
         </div>
 
         <div className="hero-visual">
