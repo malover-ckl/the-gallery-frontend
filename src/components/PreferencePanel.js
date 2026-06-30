@@ -13,13 +13,6 @@ const GRIDS = [
   { cols: 12, rows: 6, label: '12 × 6  (72 albums)' },
 ];
 
-const RESOLUTIONS = [
-  { w: 1920, h: 1080,  label: '1920 × 1080' },
-  { w: 1920, h: 1200,  label: '1920 × 1200' },
-  { w: 2560, h: 1440,  label: '2560 × 1440' },
-  { w: 3840, h: 2160,  label: '3840 × 2160' },
-];
-
 const GAPS = [
   { value: 0,  label: 'None' },
   { value: 3,  label: 'Tiny' },
@@ -50,10 +43,6 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
 
   const handleGridChange = (cols, rows) => {
     updateAndSave({ ...local, grid_cols: cols, grid_rows: rows });
-  };
-
-  const handleResChange = (w, h) => {
-    updateAndSave({ ...local, canvas_w: w, canvas_h: h });
   };
 
   const autoDetectLayout = () => {
@@ -90,7 +79,14 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
         </div>
       </div>
       
-      <div className="pref-group" style={{ marginBottom: '1.25rem' }}>
+      <div className="pref-group">
+        <label className="pref-label">Grid size 
+          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
+            {local.grid_cols} × {local.grid_rows}
+          </span>
+        </label>
+        
+        {/* Auto-detect button moved inside the Grid size section */}
         <button 
           onClick={autoDetectLayout} 
           style={{
@@ -102,44 +98,21 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, isCus
             borderRadius: 'var(--radius)',
             cursor: 'pointer',
             fontSize: '12px',
-            transition: 'background 0.2s'
+            transition: 'background 0.2s',
+            marginBottom: '0.75rem' // Space between button and pills
           }}
           onMouseOver={(e) => e.target.style.background = 'var(--surface-3)'}
           onMouseOut={(e) => e.target.style.background = 'var(--surface-2)'}
         >
           ✨ Auto-detect optimal layout
         </button>
-      </div>
 
-      <div className="pref-group">
-        <label className="pref-label">Grid size 
-          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
-            {local.grid_cols} × {local.grid_rows}
-          </span>
-        </label>
         <div className="pill-group">
           {GRIDS.map(g => (
             <button key={g.label}
               className={`pill ${local.grid_cols === g.cols && local.grid_rows === g.rows ? 'active' : ''}`}
               onClick={() => handleGridChange(g.cols, g.rows)}>
               {g.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="pref-group">
-        <label className="pref-label">Resolution
-          <span style={{float: 'right', fontWeight: 'normal', color: 'var(--text-dim)'}}>
-            {local.canvas_w} × {local.canvas_h}
-          </span>
-        </label>
-        <div className="pill-group">
-          {RESOLUTIONS.map(r => (
-            <button key={r.label}
-              className={`pill ${local.canvas_w === r.w && local.canvas_h === r.h ? 'active' : ''}`}
-              onClick={() => handleResChange(r.w, r.h)}>
-              {r.label}
             </button>
           ))}
         </div>
