@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [isCustom, setIsCustom]       = useState(false);
   const [layoutSaved, setLayoutSaved] = useState(false);
   const [balancing, setBalancing]     = useState(false);
+  const prefsRef = useRef(null);
 
   // Replace popover state
   const [replaceIndex, setReplaceIndex]     = useState(null);
@@ -40,15 +41,37 @@ export default function Dashboard() {
     setLoading(true);
     fetch(`${API}/api/preview/${userId}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(data => {
-        setAlbums(data.albums || []);
-        setIsCustom(data.is_custom || false);
-        setLoading(false);
+      .then(async (data) => {
+        const fetchedAlbums = data.albums || [];
+        const custom = data.is_custom || false;
+        setIsCustom(custom);
+
+        // If the person hasn't customized their layout yet, auto-balance
+        // colors for display (first visit, and any time the grid size
+        // changes and re-fetches a fresh, non-custom preview). This is
+        // purely a display default — it's not saved as a custom layout,
+        // so is_custom stays false and "Reset to Spotify order" stays
+        // hidden until the person actually drags or replaces something.
+        if (!custom && fetchedAlbums.length > 0 && prefsRef.current) {
+          setAlbums(fetchedAlbums);
+          setLoading(false);
+          setBalancing(true);
+          try {
+            const sorted = await sortAlbumsByColor(fetchedAlbums, prefsRef.current.grid_cols);
+            setAlbums(sorted);
+          } finally {
+            setBalancing(false);
+          }
+        } else {
+          setAlbums(fetchedAlbums);
+          setLoading(false);
+        }
       })
       .catch(() => setLoading(false));
   }, [userId]);
 
   useEffect(() => { if (prefs) loadPreview(); }, [prefs, loadPreview]);
+  useEffect(() => { prefsRef.current = prefs; }, [prefs]);
 
   const savePrefs = async (newPrefs) => {
     setPrefs(newPrefs);
