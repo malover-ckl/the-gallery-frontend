@@ -218,14 +218,14 @@ export default function Dashboard() {
   };
 
   if (!userId) return <div className="dash-error">No user ID found. <a href="/">Go back</a></div>;
-  if (!user || !prefs) return <div className="dash-loading"><div className="spinner" />Loading your gallery...</div>;
+  if (!user || !prefs) return <div className="dash-loading"><div className="spinner" />Loading your discography...</div>;
 
   return (
     <div className="dashboard">
       <nav className="dash-nav">
-        <span className="nav-logo">The Gallery</span>
+        <span className="nav-logo">Discography</span>
         <span className="dash-welcome">
-          {user.display_name ? `${user.display_name}'s gallery` : 'Your gallery'}
+          {user.display_name ? `${user.display_name}'s discography` : 'Your gallery'}
         </span>
       </nav>
 
