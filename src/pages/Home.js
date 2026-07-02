@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="home">
       <nav className="nav">
-        <span className="nav-logo">The Gallery</span>
+        <span className="nav-logo">Discography</span>
         <a href={`${API}/auth/login`} className="nav-cta">
           Connect with Spotify
         </a>
@@ -30,7 +30,7 @@ export default function Home() {
             front and center
           </h1>
           <p className="hero-body">
-            The Gallery pulls your Spotify top albums and turns them into a
+            Discography pulls your Spotify top albums and turns them into a
             stunning mosaic wallpaper — curated by your taste, updated as it evolves.
           </p>
           <a href={`${API}/auth/login`} className="btn-connect">
@@ -81,7 +81,7 @@ export default function Home() {
       </section>
 
       <footer className="footer">
-        <span>The Gallery — not affiliated with Spotify</span>
+        <span>Discography — not affiliated with Spotify</span>
       </footer>
     </div>
   );
