@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
@@ -27,8 +27,74 @@ const INTERVALS = [
   { value: 8760, label: 'Yearly' },
 ];
 
+// Reusable custom dropdown. Styled to match the app's existing pill aesthetic
+// (rounded, bordered, using the same --surface-2 / --border-warm variables
+// the sidebar buttons already use). Closes on outside click or Escape.
+function Dropdown({ label, options, activeValue, getKey, getLabel, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    function handleEscape(e) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  const activeOption = options.find(o => getKey(o) === activeValue);
+
+  return (
+    <div className="pref-dropdown" ref={ref}>
+      <button
+        type="button"
+        className={`pref-dropdown-trigger ${open ? 'open' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{activeOption ? getLabel(activeOption) : label}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className={`pref-dropdown-chevron ${open ? 'open' : ''}`}>
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {open && (
+        <ul className="pref-dropdown-menu" role="listbox">
+          {options.map(opt => {
+            const key = getKey(opt);
+            const isActive = key === activeValue;
+            return (
+              <li key={key}>
+                <button
+                  type="button"
+                  className={`pref-dropdown-option ${isActive ? 'active' : ''}`}
+                  role="option"
+                  aria-selected={isActive}
+                  onClick={() => { onSelect(opt); setOpen(false); }}
+                >
+                  {getLabel(opt)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onColorBalance, colorBalancing, isCustom }) {
-  // Every pill click now saves immediately instead of staging changes
+  // Every selection now saves immediately instead of staging changes
   // locally and waiting for an "Apply" button. `prefs` is the live source
   // of truth from Dashboard; we just merge in the one changed field and
   // hand the whole object back to onSave.
@@ -40,54 +106,50 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
 
       <div className="pref-group">
         <label className="pref-label">Time range</label>
-        <div className="pill-group">
-          {TIME_RANGES.map(t => (
-            <button key={t.value}
-              className={`pill ${prefs.time_range === t.value ? 'active' : ''}`}
-              onClick={() => update({ time_range: t.value })}>
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <Dropdown
+          label="Select time range"
+          options={TIME_RANGES}
+          activeValue={prefs.time_range}
+          getKey={t => t.value}
+          getLabel={t => t.label}
+          onSelect={t => update({ time_range: t.value })}
+        />
       </div>
 
       <div className="pref-group">
         <label className="pref-label">Grid size</label>
-        <div className="pill-group">
-          {GRIDS.map(g => (
-            <button key={g.label}
-              className={`pill ${prefs.grid_cols === g.cols && prefs.grid_rows === g.rows ? 'active' : ''}`}
-              onClick={() => update({ grid_cols: g.cols, grid_rows: g.rows })}>
-              {g.label}
-            </button>
-          ))}
-        </div>
+        <Dropdown
+          label="Select grid size"
+          options={GRIDS}
+          activeValue={`${prefs.grid_cols}x${prefs.grid_rows}`}
+          getKey={g => `${g.cols}x${g.rows}`}
+          getLabel={g => g.label}
+          onSelect={g => update({ grid_cols: g.cols, grid_rows: g.rows })}
+        />
       </div>
 
       <div className="pref-group">
         <label className="pref-label">Gap between covers</label>
-        <div className="pill-group">
-          {GAPS.map(g => (
-            <button key={g.value}
-              className={`pill ${prefs.gap_px === g.value ? 'active' : ''}`}
-              onClick={() => update({ gap_px: g.value })}>
-              {g.label}
-            </button>
-          ))}
-        </div>
+        <Dropdown
+          label="Select gap"
+          options={GAPS}
+          activeValue={prefs.gap_px}
+          getKey={g => g.value}
+          getLabel={g => g.label}
+          onSelect={g => update({ gap_px: g.value })}
+        />
       </div>
 
       <div className="pref-group">
         <label className="pref-label">Auto-refresh interval</label>
-        <div className="pill-group">
-          {INTERVALS.map(i => (
-            <button key={i.value}
-              className={`pill ${prefs.refresh_hrs === i.value ? 'active' : ''}`}
-              onClick={() => update({ refresh_hrs: i.value })}>
-              {i.label}
-            </button>
-          ))}
-        </div>
+        <Dropdown
+          label="Select interval"
+          options={INTERVALS}
+          activeValue={prefs.refresh_hrs}
+          getKey={i => i.value}
+          getLabel={i => i.label}
+          onSelect={i => update({ refresh_hrs: i.value })}
+        />
       </div>
 
       {saved && <p className="pref-saved-note">✓ Saved</p>}
@@ -95,7 +157,7 @@ export default function PreferencePanel({ prefs, onSave, saved, onShuffle, onCol
       {/* Layout buttons in sidebar */}
       <div className="pref-group pref-group--layout">
         <label className="pref-label">Layout</label>
-        
+
         <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
           <button className="btn-shuffle-sidebar" onClick={onShuffle}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
