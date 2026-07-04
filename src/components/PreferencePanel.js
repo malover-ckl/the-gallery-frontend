@@ -1,16 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { GRIDS } from '../gridOptions';
 import './PreferencePanel.css';
 
 const TIME_RANGES = [
   { value: 'short_term',  label: 'Recent (~4 weeks)' },
   { value: 'medium_term', label: 'Recent months (~6 months)' },
   { value: 'long_term',   label: 'All-time favorites' },
-];
-
-const GRIDS = [
-  { cols: 8,  rows: 5, label: '8 × 5  (40 albums)' },
-  { cols: 10, rows: 6, label: '10 × 6  (60 albums)' },
-  { cols: 12, rows: 6, label: '12 × 6  (72 albums)' },
 ];
 
 const GAPS = [

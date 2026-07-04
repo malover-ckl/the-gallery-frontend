@@ -4,6 +4,7 @@ import PreferencePanel from '../components/PreferencePanel';
 import AlbumGrid from '../components/AlbumGrid';
 import CompanionDownload from '../components/CompanionDownload';
 import { sortAlbumsByColor } from '../colorUtils';
+import { pickBestGrid } from '../gridOptions';
 import './Dashboard.css';
 
 const API = process.env.REACT_APP_API_URL || '';
@@ -61,13 +62,29 @@ export default function Dashboard() {
         const fetchedPrefs = data.preferences;
         const { w, h } = detectScreenResolution();
 
-        // Only auto-update resolution if it differs from what's saved —
+        // Auto-pick the grid whose aspect ratio best matches this screen.
+        // This runs on every fresh page load (this effect only fires once
+        // per mount, on userId), so it never fights the user mid-session —
+        // once they load in, they're free to change the grid via the
+        // dropdown and it'll stick until they reload or revisit.
+        const bestGrid = pickBestGrid(w, h);
+
+        const resolutionChanged = fetchedPrefs.canvas_w !== w || fetchedPrefs.canvas_h !== h;
+        const gridChanged = fetchedPrefs.grid_cols !== bestGrid.cols || fetchedPrefs.grid_rows !== bestGrid.rows;
+
+        // Only save if something actually differs from what's stored —
         // avoids an unnecessary extra save/reload on every single visit.
         // savePrefsRef is used (rather than calling savePrefs directly)
         // because savePrefs is defined further down and depends on userId,
         // which is already in scope here via closure — see ref note below.
-        if (fetchedPrefs.canvas_w !== w || fetchedPrefs.canvas_h !== h) {
-          savePrefsRef.current({ ...fetchedPrefs, canvas_w: w, canvas_h: h });
+        if (resolutionChanged || gridChanged) {
+          savePrefsRef.current({
+            ...fetchedPrefs,
+            canvas_w: w,
+            canvas_h: h,
+            grid_cols: bestGrid.cols,
+            grid_rows: bestGrid.rows,
+          });
         } else {
           setPrefs(fetchedPrefs);
         }
