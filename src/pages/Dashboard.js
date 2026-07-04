@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import PreferencePanel from '../components/PreferencePanel';
 import AlbumGrid from '../components/AlbumGrid';
 import CompanionDownload from '../components/CompanionDownload';
@@ -240,7 +240,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <nav className="dash-nav">
-        <span className="nav-logo">Discography</span>
+        <Link to="/" className="nav-logo">Discography</Link>
         <span className="dash-welcome">
           {user.display_name ? `${user.display_name}'s discography` : 'Your gallery'}
         </span>
