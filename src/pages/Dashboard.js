@@ -260,7 +260,7 @@ export default function Dashboard() {
             isCustom={isCustom}
           />
 
-          <CompanionDownload userId={userId} />
+          <CompanionDownload userId={userId} apiUrl={API} />
         </div>
 
         <main className="dash-main">
