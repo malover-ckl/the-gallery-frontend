@@ -14,7 +14,7 @@
      unit to fit on screen instead of overflowing and requiring a scroll.
      260px reserves room for the nav bar, page title/subtitle, and the
      "X of Y albums" footer below the grid. */
-  width: min(100%, calc((100vh - 260px) * var(--grid-aspect, 1.6)));
+  width: min(100%, calc((100vh - 210px) * var(--grid-aspect, 1.6)));
 }
 
 /* Dim the rest of the grid to isolate focus when popover is open */
