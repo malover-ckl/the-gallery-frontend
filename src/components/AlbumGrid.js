@@ -99,6 +99,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
 
   return (
     <div className="album-grid-wrap">
+      <div className="album-grid-frame">
       <div
         className={`album-grid ${replaceIndex !== null ? 'has-active-popover' : ''}`}
         style={{
@@ -181,6 +182,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
             )}
           </div>
         ))}
+      </div>
       </div>
       <div className="grid-footer">
         <p className="grid-note">

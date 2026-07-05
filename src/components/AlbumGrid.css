@@ -1,4 +1,24 @@
-.album-grid-wrap { position: relative; }
+.album-grid-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+}
+
+/* Centers the grid within whatever vertical space grid-stage hands down.
+   This div has a definite height (100% of grid-stage's flexed space),
+   which is what lets .album-grid's max-width/max-height below actually
+   mean something. */
+.album-grid-frame {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* Grid */
 .album-grid {
@@ -6,15 +26,19 @@
   background: #000;
   border-radius: 4px;
   overflow: visible;
+  /* Every cell is forced square (aspect-ratio: 1 below), so the grid's
+     natural shape is cols:rows. Setting that same ratio here, with
+     width/height auto and both maxed out at 100% of the frame, lets the
+     browser pick the largest size that fits BOTH the available width and
+     height — the same math as object-fit: contain. That means 8x5,
+     10x6, and 12x6 all fill the screen edge-to-edge on their own terms,
+     with no hardcoded pixel guesses needed. */
+  aspect-ratio: var(--grid-aspect, 1.6);
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0 auto;
-  /* Cells are forced square (aspect-ratio: 1 below), so total grid height
-     works out to (width / cols) * rows. Capping width to whichever is
-     smaller — the container's full width, or the width that keeps height
-     within the visible viewport — means the whole grid shrinks as one
-     unit to fit on screen instead of overflowing and requiring a scroll.
-     260px reserves room for the nav bar, page title/subtitle, and the
-     "X of Y albums" footer below the grid. */
-  width: min(100%, calc((100vh - 210px) * var(--grid-aspect, 1.6)));
 }
 
 /* Dim the rest of the grid to isolate focus when popover is open */
@@ -284,6 +308,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 0.65rem;
+  flex-shrink: 0;
 }
 
 .grid-note {
