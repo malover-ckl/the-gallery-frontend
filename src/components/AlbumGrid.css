@@ -6,6 +6,15 @@
   background: #000;
   border-radius: 4px;
   overflow: visible;
+  margin: 0 auto;
+  /* Cells are forced square (aspect-ratio: 1 below), so total grid height
+     works out to (width / cols) * rows. Capping width to whichever is
+     smaller — the container's full width, or the width that keeps height
+     within the visible viewport — means the whole grid shrinks as one
+     unit to fit on screen instead of overflowing and requiring a scroll.
+     260px reserves room for the nav bar, page title/subtitle, and the
+     "X of Y albums" footer below the grid. */
+  width: min(100%, calc((100vh - 260px) * var(--grid-aspect, 1.6)));
 }
 
 /* Dim the rest of the grid to isolate focus when popover is open */
