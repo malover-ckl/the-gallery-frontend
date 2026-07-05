@@ -104,6 +104,7 @@ export default function AlbumGrid({ albums, cols, rows, gap, onReorder, onReplac
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${gap}px`,
+          '--grid-aspect': cols / rows,
         }}
       >
         {cells.map((album, i) => (
