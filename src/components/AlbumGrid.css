@@ -39,6 +39,7 @@
   max-width: 92%;
   max-height: 92%;
   margin: 0 auto;
+  transition: width 0.25s ease, height 0.25s ease;
 }
 
 /* Dim the rest of the grid to isolate focus when popover is open */
