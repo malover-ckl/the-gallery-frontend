@@ -300,24 +300,26 @@ export default function Dashboard() {
             </div>
           )}
 
-          {loading
-            ? <div className="preview-loading"><div className="spinner" />Building preview...</div>
-            : <AlbumGrid
-                albums={albums}
-                cols={prefs.grid_cols}
-                rows={prefs.grid_rows}
-                gap={prefs.gap_px}
-                onReorder={handleReorder}
-                onReplace={handleReplace}
-                replaceIndex={replaceIndex}
-                searchQuery={searchQuery}
-                searchResults={searchResults}
-                searching={searching}
-                onSearchInput={handleSearchInput}
-                onPick={handlePick}
-                onCloseReplace={handleCloseReplace}
-              />
-          }
+          <div className="grid-stage">
+            {loading
+              ? <div className="preview-loading"><div className="spinner" />Building preview...</div>
+              : <AlbumGrid
+                  albums={albums}
+                  cols={prefs.grid_cols}
+                  rows={prefs.grid_rows}
+                  gap={prefs.gap_px}
+                  onReorder={handleReorder}
+                  onReplace={handleReplace}
+                  replaceIndex={replaceIndex}
+                  searchQuery={searchQuery}
+                  searchResults={searchResults}
+                  searching={searching}
+                  onSearchInput={handleSearchInput}
+                  onPick={handlePick}
+                  onCloseReplace={handleCloseReplace}
+                />
+            }
+          </div>
         </main>
       </div>
     </div>
