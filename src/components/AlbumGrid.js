@@ -5,7 +5,7 @@ import AlbumGrid from '../components/AlbumGrid';
 import CompanionDownload from '../components/CompanionDownload';
 import { sortAlbumsByColor } from '../colorUtils';
 import { pickBestGrid } from '../gridOptions';
-import './Dashboard.css';
+import './AlbumGrid.css';
 
 const API = process.env.REACT_APP_API_URL || '';
 
