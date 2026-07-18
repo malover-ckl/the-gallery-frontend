@@ -1,4 +1,4 @@
-.dashboard { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+.dashboard { min-height: 100vh; overflow: hidden; display: flex; flex-direction: column; background: var(--bg); }
 
 /* ── Nav ── */
 .dash-nav {
