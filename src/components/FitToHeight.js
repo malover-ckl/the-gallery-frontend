@@ -15,7 +15,7 @@ export default function FitToHeight({ children, className }) {
 
     const availableHeight = outer.clientHeight;
     const contentHeight = inner.scrollHeight;
-
+	console.log('FitToHeight recalc:', { availableHeight, contentHeight });
     const nextScale = contentHeight > availableHeight
       ? availableHeight / contentHeight
       : 1;
