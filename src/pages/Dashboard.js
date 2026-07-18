@@ -5,6 +5,7 @@ import AlbumGrid from '../components/AlbumGrid';
 import CompanionDownload from '../components/CompanionDownload';
 import { sortAlbumsByColor } from '../colorUtils';
 import { pickBestGrid } from '../gridOptions';
+import FitToHeight from '../components/FitToHeight'; 
 import './Dashboard.css';
 
 const API = process.env.REACT_APP_API_URL || '';
@@ -250,17 +251,18 @@ export default function Dashboard() {
         {/* SIDEBAR */}
         <div className="dash-sidebar">
 
-          <PreferencePanel
-            prefs={prefs}
-            onSave={savePrefs}
-            saved={saved}
-            onShuffle={handleShuffle}
-            onColorBalance={handleColorBalance}
-            colorBalancing={balancing}
-            isCustom={isCustom}
-          />
-
-          <CompanionDownload userId={userId} apiUrl={API} />
+           <FitToHeight className="sidebar-fit-content">
+    <PreferencePanel
+      prefs={prefs}
+      onSave={savePrefs}
+      saved={saved}
+      onShuffle={handleShuffle}
+      onColorBalance={handleColorBalance}
+      colorBalancing={balancing}
+      isCustom={isCustom}
+    />
+    <CompanionDownload userId={userId} apiUrl={API} />
+  </FitToHeight>
         </div>
 
         <main className="dash-main">
@@ -320,8 +322,11 @@ export default function Dashboard() {
                 />
             }
           </div>
+
         </main>
       </div>
     </div>
   );
+
+
 }
