@@ -41,10 +41,13 @@
   border-right: 1px solid var(--border);
   padding: 1.75rem 1.25rem;
   overflow-y: auto;
+  background: var(--surface);
+}
+
+.sidebar-fit-content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background: var(--surface);
 }
 
 /* ── Main ── */
